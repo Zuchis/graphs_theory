@@ -80,8 +80,7 @@ int list_add_node(_list_header *list, _list_data *data, int pos){
     }
     return 0;
 }
-// PAREI AQUI LOLLOLOLO SATAN 666
-list graph_create()
+_list_header *graph_create()
 {
     FILE * entrada = fopen ("entrada.txt", "r");
     char str[500];
@@ -91,7 +90,6 @@ list graph_create()
     int u, no_nodes, i, degree_counter = 0;
     u = 0;
     i = 0;
-	int **matrix;
     no_nodes = line_counter(entrada);
         while (!feof(entrada)){
         if (fgets(str,500,entrada) != "\n"){ //Esta parte do código pega linha por linha para analisar todas as adjacências do grafo

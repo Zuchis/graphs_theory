@@ -37,6 +37,7 @@ void list_print(_list_header*); // Print the itens in the list. Works only for p
 int list_add_node(_list_header*, _list_data*, int);
 int line_counter(FILE*);
 void print_vector(int*,int);
+_list_header *graph_create(void);
 int **create_adjacency_matrix(void);
 void dfs_header(void);
 void dfs(int, int **, int *,int);
