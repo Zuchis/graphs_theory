@@ -87,10 +87,8 @@ _list_header *graph_create()
     char *str2;
     _list_header *list = list_create();
     _list_data aux;
-    int u, no_nodes, i, degree_counter = 0;
+    int u,degree_counter = 0;
     u = 0;
-    i = 0;
-    no_nodes = line_counter(entrada);
         while (!feof(entrada)){
         if (fgets(str,500,entrada) != "\n"){ //Esta parte do código pega linha por linha para analisar todas as adjacências do grafo
             str2 = strtok(str,":"); //Separando o vértice da vez que sempre será o número que vem antes do símbolo ':'
@@ -99,11 +97,11 @@ _list_header *graph_create()
             list_add_end(list,&aux);
             while((str2 != NULL)){ // este laço serve para capturar todos os vértices vizinhos do vértice que está sendo analisado
                 str2 = strtok(NULL, "-");
-                if ((str2 != '\n') && (str2 != '\0')){
+                if ((strcmp(str2,"\n") != 0) && (strcmp(str2,"\0") != 0) ){
                     aux.node = atoi(str2);
                 }
                 str2 = strtok(NULL, " ");
-                if ((str2 != '\n') && (str2 != '\0')){
+                if ((strcmp(str2,"\n") != 0) && (strcmp(str2,"\0") != 0) ){
                     aux.weight = atoi(str2);
                     degree_counter++;
                     list_add_node(list,&aux,u);
@@ -201,7 +199,6 @@ int **create_adjacency_matrix(void)
 	FILE * entrada = fopen ("entrada.txt", "r");
 	char str[500];
 	char *str2;
-	char tipo;
 	int i, j, n, u = 0;
 	n = line_counter(entrada);
 	rewind(entrada);
@@ -228,7 +225,7 @@ int **create_adjacency_matrix(void)
 		       i = atoi(str2);
 		       while((str2 != NULL)){ // este laço serve para capturar todos os vértices vizinhos do vértice que está sendo analisado
 		           str2 = strtok(NULL, " ");
-		           if ((str2 != '\n') && (str2 != '\0') && (strcmp("n",str2) != 0)){
+		           if ((strcmp(str2,"\n") != 0) && (strcmp(str2,"\0") != 0) && (strcmp("n",str2) != 0)){
 		               j = atoi(str2);
 		               matrix[i][j]++; // acrescenta +1 para cada vez que a ligação entre dois vértices for encontrada
 		               u++; // a variável 'u' contará o número de arestas
@@ -246,7 +243,7 @@ void dfs_header()
 	FILE *fp = fopen("entrada.txt","r");
 	int **a = create_adjacency_matrix();
 	int n = line_counter(fp);
-	int *reach = (int*)malloc(i*sizeof(int));
+	int *reach = (int*)malloc(n*sizeof(int));
 	for (i = 0; i < n; i++)
 		reach[i] = 0;
 	print_vector(reach,n);
