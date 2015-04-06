@@ -22,15 +22,10 @@ int main (int argc, char *argv[])
             list_add_end(list,&aux);
             while((str2 != NULL)){ // este laço serve para capturar todos os vértices vizinhos do vértice que está sendo analisado
                 str2 = strtok(NULL, "-");
-                //puts(str2);
-                //puts("\n");
                 if ((str2 != '\n') && (str2 != '\0')){
                     aux.node = atoi(str2);
                 }
-                    //printf("No %d\n",aux.node);
                 str2 = strtok(NULL, " ");
-                //puts(str2);
-                //puts("\n");
                 if ((str2 != '\n') && (str2 != '\0')){
                     aux.weight = atoi(str2);
                     degree_counter++;
@@ -41,12 +36,7 @@ int main (int argc, char *argv[])
             u++;
         }
     }
-/*    printf("Adjacency List: \n\n");*/
-/*    list_print(list);*/
-/*	matrix = create_adjacency_matrix();*/
-/*	puts("Adjacency Matrix\n");*/
-/*	print_matrix(matrix,no_nodes,no_nodes);*/
 	dfs_header();
-	
+
     return 0;
 }

@@ -80,84 +80,46 @@ int list_add_node(_list_header *list, _list_data *data, int pos){
     }
     return 0;
 }
-
-/*int list_add_sorted(_list_header *list,_list_data *data){
-    if(list_empty(list)==1 || data->n<=list->first->data->n){
-        return list_add_begining(list,data);
-    }else{
-        int i;
-        _list_member *aux=list->first;
-        while(aux->next!=NULL && aux->next->data->n<data->n){
-            aux=aux->next;
-        }
-
-        _list_data *datanew=(_list_data*)malloc(sizeof(_list_data));
-        _list_member *new=(_list_member*)malloc(sizeof(_list_member));
-        if(new!=NULL){
-            new->next=aux->next;
-            new->data=datanew;
-            memcpy(datanew,data,sizeof(_list_data));
-            aux->next=new;
-            new->prev=aux;
-            list->size++;
-            return list->size;
+// PAREI AQUI LOLLOLOLO SATAN 666
+list graph_create()
+{
+    FILE * entrada = fopen ("entrada.txt", "r");
+    char str[500];
+    char *str2;
+    _list_header *list = list_create();
+    _list_data aux;
+    int u, no_nodes, i, degree_counter = 0;
+    u = 0;
+    i = 0;
+	int **matrix;
+    no_nodes = line_counter(entrada);
+        while (!feof(entrada)){
+        if (fgets(str,500,entrada) != "\n"){ //Esta parte do código pega linha por linha para analisar todas as adjacências do grafo
+            str2 = strtok(str,":"); //Separando o vértice da vez que sempre será o número que vem antes do símbolo ':'
+            aux.node = atoi(str2);
+            aux.weight = 0;
+            list_add_end(list,&aux);
+            while((str2 != NULL)){ // este laço serve para capturar todos os vértices vizinhos do vértice que está sendo analisado
+                str2 = strtok(NULL, "-");
+                if ((str2 != '\n') && (str2 != '\0')){
+                    aux.node = atoi(str2);
+                }
+                str2 = strtok(NULL, " ");
+                if ((str2 != '\n') && (str2 != '\0')){
+                    aux.weight = atoi(str2);
+                    degree_counter++;
+                    list_add_node(list,&aux,u);
+                }
+            }
+            degree_counter = 0;
+            u++;
         }
     }
+    return list;
 }
 
-_list_data *list_del_begining(_list_header *list){
-    if(list_empty(list)==1){
-        return NULL;
-    }else{
-        _list_member *t=list->first;
-        _list_data *data=t->data;
-        list->first=t->next;
-        if(t->next!=NULL)
-            t->next->prev=NULL;
-        list->size--;
-        free(t);
-        return data;
-    }
-}
 
-_list_data *list_del_end(_list_header *list){
-   if(list_empty(list)==1){
-        return 0;
-   }else{
-        _list_member *aux=list->first;
-        while(aux->next->next!=NULL)
-            aux=aux->next;
-        _list_member *t=aux->next;
-        _list_data *data=aux->data;
-        aux->next=NULL;
-        list->size--;
-        free(t);
-        return data;
-   }
-}
 
-_list_data *list_del(_list_header *list,int pos){
-   if(list_empty(list)==1 || pos>list_size(list)){
-        return 0;
-   }else if(pos==0){
-        list_del_begining(list);
-   }else if(pos==list_size(list)){
-        list_del_end(list);
-   }else{
-        int i;
-        _list_member *aux=list->first;
-        for(i=0;i<pos-1;i++)
-            aux=aux->next;
-
-        _list_member *t=aux->next;
-        _list_data *data=aux->data;
-        aux->next=aux->next->next;
-        list->size--;
-        free(t);
-        return data;
-   }
-}
-*/
 int list_empty(_list_header *list){
     if(list->size==0)
         return 1;
@@ -172,7 +134,7 @@ int list_size(_list_header* list){
 		aux=aux->down;
 		i++;
 	}
-	return i;	
+	return i;
 }
 
 void list_print(_list_header *list){
@@ -246,7 +208,7 @@ int **create_adjacency_matrix(void)
 	n = line_counter(entrada);
 	rewind(entrada);
 	int **matrix;
- 
+
 	if ((matrix = (int **)malloc(n*sizeof(int*)))!= NULL){
 		for (i = 0; i < n; i++){
 			if((matrix[i] = (int*)malloc(n*sizeof(int*))) == NULL){
@@ -292,15 +254,15 @@ void dfs_header()
 	print_vector(reach,n);
 	print_matrix(a,n,n);
 	dfs(2,a,reach,n);
-	printf("\n");  
-	  for(i = 0; i < n; i++){  
-	   if(reach[i])  
-	   count++;  
-	  }  
-	  if(count==n)  
-	  printf("\n Graph is connected\n");  
-	  else  
-	  printf("\n Graph is not connected\n"); 
+	printf("\n");
+	  for(i = 0; i < n; i++){
+	   if(reach[i])
+	   count++;
+	  }
+	  if(count==n)
+	  printf("\n Graph is connected\n");
+	  else
+	  printf("\n Graph is not connected\n");
 }
 
 void dfs(int v, int **a, int *reach,int n)
