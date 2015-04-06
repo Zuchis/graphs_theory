@@ -8,7 +8,6 @@
 typedef struct{
     int node;
     int weight;
-    int visited;
 }_list_data;
 
 typedef struct __list_member{   // The itens in the list

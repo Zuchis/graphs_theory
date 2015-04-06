@@ -249,16 +249,17 @@ int **create_adjacency_matrix(void)
 void dfs_header(_list_header *list)
 {
 	_list_member *aux = list->first;
-	_list_member *aux2 = aux;
-	while (aux != NULL){
-		aux->data->visited = 0;      
-		aux = aux->down;
-	}
-	dfs(aux2,aux2->data->node);
+	
 }
 
-void dfs(_list_member *aux, int node)
+void dfs(int v, int **a, int *reach,int n)
 {
-	aux->data->visited = 1;
-	
+	int i;
+	reach[v] = 1;
+	for (i = 0; i < n; i++){
+		if(a[v][i] && !reach[i]){
+			printf("\n %d -> %d",v,i);
+			dfs(i,a,reach,n);
+		}
+	}
 }
