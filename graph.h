@@ -40,6 +40,6 @@ int line_counter(FILE*);
 void print_vector(int*,int);
 _list_header *graph_create(void);
 int **create_adjacency_matrix(void);
-void dfs_header(_list_header *list);
-void dfs(int, int **, int *,int);
+void dfs_header(_list_header*);
+void dfs(_list_header*,_list_member*, int);
 #endif

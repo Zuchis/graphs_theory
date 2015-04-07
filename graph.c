@@ -254,34 +254,26 @@ void dfs_header(_list_header *list)
 		aux->data->visited = 0;      
 		aux = aux->down;
 	}
-	dfs(aux2,aux2->data->node);
+	dfs(list,aux2,aux2->data->node);
 }
 
-void dfs(_list_member *aux, int n)
+void dfs(_list_header *list,_list_member *aux, int n)
 {
-	if (aux == NULL){
-		printf("NULL Graph);
+	_list_member *aux2 = list->first;
+	while (aux2 != NULL && aux2->data->node != n)
+		aux2 = aux2->down;
+	if (aux2 == NULL){
+		puts("Element not contained in the graph");
 		return;
 	}
-	while(aux != NULL && aux->data->node != n){
-		aux = aux->down;
+	aux2->data->visited = 1;
+	aux = aux2->next;
+	while (aux != NULL) {
+		if(aux != NULL && aux->data->visited == 0){
+			aux->data->visited = 1;
+			if (aux->next != NULL)
+				printf("%d --> %d",aux->data->node, aux->next->data->node);
+			aux = aux->next
+		}
 	}
-	if(aux != NULL && aux->data->visited == 0){
-		aux->data->visited = 1;
-		if (aux->next != NULL)
-			printf("%d --> %d",aux->data->node, aux->next->data->node);
-		//PAREI AQUI LOLOLOLOLO SATAN 666
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
