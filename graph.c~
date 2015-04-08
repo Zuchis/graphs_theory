@@ -249,17 +249,39 @@ int **create_adjacency_matrix(void)
 void dfs_header(_list_header *list)
 {
 	_list_member *aux = list->first;
-	
+	_list_member *aux2 = aux;
+	while (aux != NULL){
+		aux->data->visited = 0;      
+		aux = aux->down;
+	}
+	dfs(aux2,aux2->data->node);
 }
 
-void dfs(int v, int **a, int *reach,int n)
+void dfs(_list_member *aux, int n)
 {
-	int i;
-	reach[v] = 1;
-	for (i = 0; i < n; i++){
-		if(a[v][i] && !reach[i]){
-			printf("\n %d -> %d",v,i);
-			dfs(i,a,reach,n);
-		}
+	if (aux == NULL){
+		printf("NULL Graph);
+		return;
 	}
+	while(aux != NULL && aux->data->node != n){
+		aux = aux->down;
+	}
+	if(aux != NULL && aux->data->visited == 0){
+		aux->data->visited = 1;
+		if (aux->next != NULL)
+			printf("%d --> %d",aux->data->node, aux->next->data->node);
+		//PAREI AQUI LOLOLOLOLO SATAN 666
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

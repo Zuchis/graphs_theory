@@ -257,8 +257,31 @@ void dfs_header(_list_header *list)
 	dfs(aux2,aux2->data->node);
 }
 
-void dfs(_list_member *aux, int node)
+void dfs(_list_member *aux, int n)
 {
-	aux->data->visited = 1;
-	
+	if (aux == NULL){
+		printf("NULL Graph);
+		return;
+	}
+	while(aux != NULL && aux->data->node != n){
+		aux = aux->down;
+	}
+	if(aux != NULL && aux->data->visited == 0){
+		aux->data->visited = 1;
+		if (aux->next != NULL)
+			printf("%d --> %d",aux->data->node, aux->next->data->node);
+		//PAREI AQUI LOLOLOLOLO SATAN 666
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
