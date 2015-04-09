@@ -87,17 +87,20 @@ int list_add_node(_list_header *list, _list_data *data, int pos){
 _list_header *graph_create()
 {
     FILE * entrada = fopen ("entrada.txt", "r");
-    char str[500];
+    char *str;
     char *str2;
     _list_header *list = list_create();
     _list_data aux;
     int u, no_nodes, i, degree_counter = 0;
     u = 0;
     i = 0;
-	int **matrix;
     no_nodes = line_counter(entrada);
+    int m = no_nodes*3 + 1;
+    if ((str =(char*)malloc(m*sizeof(char))) == NULL)
+        exit(EXIT_FAILURE);
+    str[m] = '\0';
         while (!feof(entrada)){
-        if (fgets(str,500,entrada) != "\n"){
+        if (fgets(str,m,entrada) != "\n"){
             str2 = strtok(str,":");
             aux.node = atoi(str2);
             aux.weight = 0;
