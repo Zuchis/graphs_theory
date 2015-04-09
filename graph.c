@@ -95,7 +95,7 @@ _list_header *graph_create()
     u = 0;
     i = 0;
     no_nodes = line_counter(entrada);
-    int m = no_nodes*3 + 1;
+    int m = no_nodes*4 + 1;
     if ((str =(char*)malloc(m*sizeof(char))) == NULL)
         exit(EXIT_FAILURE);
     str[m] = '\0';
@@ -109,14 +109,14 @@ _list_header *graph_create()
                 str2 = strtok(NULL, "-");
                 //puts(str2);
                 //puts("\n");
-                if ((str2 != '\n') && (str2 != '\0')){
+                if (str2 != NULL){
                     aux.node = atoi(str2);
                 }
                     //printf("No %d\n",aux.node);
                 str2 = strtok(NULL, " ");
                 //puts(str2);
                 //puts("\n");
-                if ((str2 != '\n') && (str2 != '\0')){
+                if (str2 != NULL){
                     aux.weight = atoi(str2);
                     degree_counter++;
                     list_add_node(list,&aux,u);
@@ -212,12 +212,16 @@ void print_matrix(int **matrix, int m, int n)
 int **create_adjacency_matrix(void)
 {
 	FILE * entrada = fopen ("entrada.txt", "r");
-	char str[500];
+	char *str;
 	char *str2;
 	int i, j, n, u = 0;
 	n = line_counter(entrada);
 	rewind(entrada);
 	int **matrix;
+    int m = n*4 + 1;
+    if ((str =(char*)malloc(m*sizeof(char))) == NULL)
+        exit(EXIT_FAILURE);
+    str[m] = '\0';
 
 	if ((matrix = (int **)malloc(n*sizeof(int*)))!= NULL){
 		for (i = 0; i < n; i++){
@@ -235,13 +239,13 @@ int **create_adjacency_matrix(void)
 			matrix[i][j] = 0;
 	}
 	while (!feof(entrada)){
-		   fgets(str,500,entrada);
-       	   if (strcmp(str,"\n") != 0){ //Esta parte do código pega linha por linha para analisar todas as adjacências do grafo
+		   fgets(str,m,entrada);
+       	   if (str2 != NULL){ //Esta parte do código pega linha por linha para analisar todas as adjacências do grafo
 		       str2 = strtok(str,":"); //Separando o vértice da vez que sempre será o número que vem antes do símbolo ':'
 		       i = atoi(str2);
 		       while((str2 != NULL)){ // este laço serve para capturar todos os vértices vizinhos do vértice que está sendo analisado
 		           str2 = strtok(NULL, " ");
-		           if ((strcmp(str2,"\n") != 0) && (strcmp(str2,"\0") != 0) && (strcmp("n",str2) != 0)){
+		           if (str2 != NULL){
 		               j = atoi(str2);
 		               matrix[i][j]++; // acrescenta +1 para cada vez que a ligação entre dois vértices for encontrada
 		               u++; // a variável 'u' contará o número de arestas
