@@ -27,7 +27,7 @@ typedef struct{     // The header of the list
 _list_header *list_create();
 int list_empty(_list_header*);  // Return 1 if the list is empty
 int list_add_begining(_list_header*, _list_data*);  // Add an item on the begining of the list, returns thesize, or zero on failure
-int list_add_end(_list_header*,_list_data*); // Add an item on the end of the list and return the size, or zero on failure
+void list_add_end(_list_header*,_list_data*); // Add an item on the end of the list and return the size, or zero on failure
 int list_add(_list_header*,_list_data*,int); // Add an item on a given position and returns the size,or zero on failure
 int list_add_sorted(_list_header*,_list_data*); // Add an item in a sorted way. Return zero un failure
 int list_size(_list_header*);   // Return the size of the list
@@ -41,5 +41,6 @@ void print_vector(int*,int);
 _list_header *graph_create(void);
 int **create_adjacency_matrix(void);
 void dfs_header(_list_header*);
-void dfs(_list_header*,_list_member*, int);
+void dfs(_list_header*, int);
+void graph_is_connected (_list_header *);
 #endif

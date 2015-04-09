@@ -30,13 +30,17 @@ int list_add_begining(_list_header *list, _list_data *data){
     return 0;
 }
 
-int list_add_end(_list_header *list, _list_data *data){
+void list_add_end(_list_header *list, _list_data *data){
     if(list_empty(list)==1){
-        return list_add_begining(list,data);
+        list_add_begining(list,data);
     }else{
         _list_member *aux=list->first;
         while(aux->down!=NULL){
             aux=aux->down;
+            if (aux->data->node == data->node){
+                puts("Well, looks like our sloppy programmer over here has made a noob mistake,\nthere is a node which has already been inserted!\n");
+                return;
+            }
         }
         _list_data *datanew=(_list_data*)malloc(sizeof(_list_data));
         _list_member *new=(_list_member*)malloc(sizeof(_list_member));
@@ -48,10 +52,10 @@ int list_add_end(_list_header *list, _list_data *data){
             aux->down=new;
             new->up=aux;
             list->size++;
-            return list->size;
+            return;
         }
     }
-    return 0;
+    return;
 }
 
 int list_add_node(_list_header *list, _list_data *data, int pos){
@@ -93,12 +97,12 @@ _list_header *graph_create()
 	int **matrix;
     no_nodes = line_counter(entrada);
         while (!feof(entrada)){
-        if (fgets(str,500,entrada) != "\n"){ //Esta parte do código pega linha por linha para analisar todas as adjacências do grafo
-            str2 = strtok(str,":"); //Separando o vértice da vez que sempre será o número que vem antes do símbolo ':'
+        if (fgets(str,500,entrada) != "\n"){
+            str2 = strtok(str,":");
             aux.node = atoi(str2);
             aux.weight = 0;
             list_add_end(list,&aux);
-            while((str2 != NULL)){ // este laço serve para capturar todos os vértices vizinhos do vértice que está sendo analisado
+            while((str2 != NULL)){
                 str2 = strtok(NULL, "-");
                 //puts(str2);
                 //puts("\n");
@@ -144,7 +148,7 @@ int list_size(_list_header* list){
 void list_print(_list_header *list){
     _list_member *aux=list->first;
     _list_member *aux2 = aux;
-    while (aux2->down!=NULL){
+    while (aux2!=NULL){
         printf("%d --> ", aux->data->node);
         while(aux->next!=NULL){
             aux=aux->next;
@@ -154,10 +158,10 @@ void list_print(_list_header *list){
         aux2=aux2->down;
         aux = aux2;
     }
-	 while(aux->next!=NULL){
+	/* while(aux->next!=NULL){
 		       aux=aux->next;
 		       printf("%d (%d) --> ",aux->data->node,aux->data->weight);
-		   }
+		   }*/
 	//free(aux);
 	//free(aux2);
 }
@@ -251,29 +255,56 @@ void dfs_header(_list_header *list)
 	_list_member *aux = list->first;
 	_list_member *aux2 = aux;
 	while (aux != NULL){
-		aux->data->visited = 0;      
+		aux->data->visited = 0;
 		aux = aux->down;
 	}
-	dfs(list,aux2,aux2->data->node);
+	dfs(list,aux2->data->node);
+    return;
 }
 
-void dfs(_list_header *list,_list_member *aux, int n)
+void dfs(_list_header *list, int n)
 {
 	_list_member *aux2 = list->first;
+    _list_member *aux = NULL;
 	while (aux2 != NULL && aux2->data->node != n)
 		aux2 = aux2->down;
 	if (aux2 == NULL){
 		puts("Element not contained in the graph");
 		return;
 	}
-	aux2->data->visited = 1;
+    if (aux2->data->visited == 0)
+	    aux2->data->visited = 1;
+    else
+        return;
 	aux = aux2->next;
 	while (aux != NULL) {
-		if(aux != NULL && aux->data->visited == 0){
-			aux->data->visited = 1;
-			if (aux->next != NULL)
-				printf("%d --> %d",aux->data->node, aux->next->data->node);
-			aux = aux->next
-		}
+			printf("%d --> %d\n",aux2->data->node, aux->data->node);
+            dfs(list,aux->data->node);
+			aux = aux->next;
 	}
+    return;
+}
+
+void graph_is_connected (_list_header *list)
+{
+    int i = 1;
+    int flag = 0;
+    dfs_header(list);
+    _list_member *aux = list->first;
+    while(aux!= NULL){
+        printf("The current node being analyzed is: %d, and its visited status is: %d\n",aux->data->node,aux->data->visited);
+        if (aux->data->visited == 0){
+            flag = 1;
+            i++;
+            dfs(list,aux->data->node);
+            puts("\n");
+        }
+        aux = aux->down;
+    }
+    if (flag){
+        printf("The graph is not connected, and it has %d different components\n\n",i);
+        return;
+    }
+    printf("The graph is connected\n");
+    return;
 }
