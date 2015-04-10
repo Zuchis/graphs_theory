@@ -292,7 +292,7 @@ void dfs(_list_header *list, int n)
     return;
 }
 
-void graph_is_connected (_list_header *list)
+int graph_is_connected (_list_header *list)
 {
     int i = 1;
     int flag = 0;
@@ -310,8 +310,28 @@ void graph_is_connected (_list_header *list)
     }
     if (flag){
         printf("The graph is not connected, and it has %d different components\n\n",i);
-        return;
+        return 0;
     }
     printf("The graph is connected\n");
-    return;
+    return 1;
+}
+
+int graph_remove_row(_list_header *list, int node, int row)
+{
+    _list_member *aux, *aux2;
+    aux = list->first;
+    while(aux != NULL && aux->data->node != node)
+        aux = aux->down;
+    if (aux == NULL){
+        puts("Node is not contained on the list");
+        return 0;
+    }
+    aux2 = aux->next;
+    while (aux2 != NULL && aux2->data->node != row)
+        aux2 = aux2->next;
+    aux2->prev->next = aux2->next;
+    if(aux2->next != NULL)
+    aux2->next->prev = aux2->prev;
+    free(aux2);
+    return 1;
 }

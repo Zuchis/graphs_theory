@@ -42,5 +42,6 @@ _list_header *graph_create(void);
 int **create_adjacency_matrix(void);
 void dfs_header(_list_header*);
 void dfs(_list_header*, int);
-void graph_is_connected (_list_header *);
+int graph_is_connected (_list_header *);
+int graph_remove_row(_list_header*,int,int);
 #endif
