@@ -4,9 +4,9 @@
 
 int main (int argc, char *argv[])
 {
-    _list_header *list = graph_create();
-	list_print(list);
-    graph_remove_row(list,0,1);
-    list_print(list);
+    _list_header *graph = graph_create();
+    _list_header *path = list_create();
+    path = graph_has_eulerian_circle(graph);
+    path_print(path);
 	return 0;
 }
