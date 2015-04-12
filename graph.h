@@ -37,8 +37,8 @@ int line_counter(FILE*);
 void print_vector(int*,int);
 _list_header *graph_create(void);
 int **create_adjacency_matrix(void);
-void dfs_header(_list_header*);
-void dfs(_list_header*, int);
+void dfs_header(_list_header*,int);
+void dfs(_list_header*, int, int);
 int graph_is_connected (_list_header *);
 _list_data *graph_remove_row(_list_header*,int,int);
 int graph_degree_counter(_list_header *);
@@ -48,4 +48,7 @@ int path_add_row_beginning(_list_header *, _list_data *);
 void path_print(_list_header *);
 _list_header *graph_has_eulerian_circle(_list_header *);
 void eulerian_circle(_list_header *, _list_header *, int);
+int graph_is_a_tree(_list_header *);
+void path_create_path (_list_header *, _list_header *, int);
+_list_header *graph_tree_centers(_list_header *);
 #endif

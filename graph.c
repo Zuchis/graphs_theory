@@ -38,7 +38,7 @@ void list_add_end(_list_header *list, _list_data *data){
         while(aux->down!=NULL){
             aux=aux->down;
             if (aux->data->node == data->node){
-               // puts("Well, looks like our sloppy programmer over here has made a noob mistake,\nthere is a node which has already been inserted!\n");
+                // puts("Well, looks like our sloppy programmer over here has made a noob mistake,\nthere is a node which has already been inserted!\n");
                 return;
             }
         }
@@ -126,6 +126,9 @@ _list_header *graph_create()
             u++;
         }
     }
+    free(str);
+    free(str2);
+    rewind(entrada);
     return list;
 }
 
@@ -149,7 +152,7 @@ int list_size(_list_header* list){
 }
 
 void list_print(_list_header *list){
-    if(list != NULL){
+    if(list->first != NULL){
         _list_member *aux=list->first;
         _list_member *aux2 = aux;
         while (aux2!=NULL){
@@ -256,7 +259,7 @@ int **create_adjacency_matrix(void)
     return matrix;
 }
 
-void dfs_header(_list_header *list)
+void dfs_header(_list_header *list, int node)
 {
     if (list == NULL){
         printf("Null graph");
@@ -268,11 +271,11 @@ void dfs_header(_list_header *list)
         aux->data->visited = 0;
         aux = aux->down;
     }
-    dfs(list,aux2->data->node);
+    dfs(list,node, 1);
     return;
 }
 
-void dfs(_list_header *list, int n)
+void dfs(_list_header *list, int n, int counter)
 {
     _list_member *aux2 = list->first;
     _list_member *aux = NULL;
@@ -282,14 +285,16 @@ void dfs(_list_header *list, int n)
         puts("Element not contained in the graph");
         return;
     }
-    if (aux2->data->visited == 0)
-        aux2->data->visited = 1;
+    if (aux2->data->visited == 0){
+        aux2->data->visited = counter;
+        counter++;
+    }
     else
         return;
     aux = aux2->next;
     while (aux != NULL) {
-       // printf("%d --> %d\n",aux2->data->node, aux->data->node);
-        dfs(list,aux->data->node);
+       // printf("%d --> %d path length: %d\n",aux2->data->node, aux->data->node, aux2->data->visited);
+        dfs(list,aux->data->node,counter);
         aux = aux->next;
     }
     return;
@@ -299,14 +304,14 @@ int graph_is_connected (_list_header *list)
 {
     int i = 1;
     int flag = 0;
-    dfs_header(list);
     _list_member *aux = list->first;
+    dfs_header(list,aux->data->node);
     while(aux!= NULL){
         //printf("The current node being analyzed is: %d, and its visited status is: %d\n",aux->data->node,aux->data->visited);
         if (aux->data->visited == 0){
             flag = 1;
             i++;
-            dfs(list,aux->data->node);
+            dfs(list,aux->data->node,1);
             puts("\n");
         }
         aux = aux->down;
@@ -315,19 +320,19 @@ int graph_is_connected (_list_header *list)
         printf("The graph is not connected, and it has %d different components\n\n",i);
         return 0;
     }
-    printf("The graph is connected\n");
+    //printf("The graph is connected\n");
     return 1;
 }
 
 int graph_number_of_components (_list_header *list)
 {
     int i = 1;
-    dfs_header(list);
     _list_member *aux = list->first;
+    dfs_header(list,aux->data->node);
     while(aux!= NULL){
         if (aux->data->visited == 0){
             i++;
-            dfs(list,aux->data->node);
+            dfs(list,aux->data->node,1);
             puts("\n");
         }
         aux = aux->down;
@@ -443,7 +448,6 @@ void eulerian_circle(_list_header *list, _list_header *path, int row)
     return;
 }
 
-
 int path_add_row_beginning(_list_header *list, _list_data *data)
 {
     _list_member *new=(_list_member*)malloc(sizeof(_list_member));
@@ -461,7 +465,6 @@ int path_add_row_beginning(_list_header *list, _list_data *data)
     }
     return 0;
 }
-
 
 int path_add_row_end(_list_header *list, _list_data *data)
 {
@@ -502,4 +505,125 @@ void path_print(_list_header *path)
     }
     puts("Null path");
     return;
+}
+
+void list_purge(_list_header *path)
+{
+    if (path != NULL && !list_empty(path)){
+        _list_member *aux2, *aux, *aux3 = path->first;
+        while (aux3 != NULL){
+            aux = aux3;
+            aux2 = aux->next;
+            while(aux != NULL){
+                free(aux);
+                aux = aux2;
+                if(aux2 != NULL)
+                    aux2 = aux2->next;
+            }
+            aux3 = aux3->down;
+        }
+    }
+}
+
+int graph_is_a_tree(_list_header *graph)
+{
+    if (!graph_is_connected(graph)){
+        puts("The graph is not connected, therefore it can't be a tree.\n");
+        return 0;
+    }
+    _list_member *aux2, *aux = graph->first;
+    _list_header *path = list_create();
+    path_create_path(graph, path, aux->data->node);
+    aux = path->first;
+    while(aux != NULL){
+        aux2 = path->first;
+        while(aux2 != NULL){
+            if (aux != aux2 && aux2->data->node == aux->data->node)
+                return 0;
+            aux2= aux2->next;
+        }
+        aux = aux->next;
+    }
+    return 1;
+}
+
+void path_create_path (_list_header *graph, _list_header *path, int row)
+{
+    _list_member *aux2, *aux = graph->first;
+    _list_data *removedRow2, *removedRow;
+    while(aux != NULL && aux->data->node != row)
+        aux = aux->down;
+    if (aux == NULL){
+        puts("node not inserted on the list");
+        return;
+    }
+    path_add_row_end(path,aux->data);
+    aux2 = aux->next;
+    while (aux2 != NULL){
+        /* if (aux->next->next == NULL){
+           removedRow = graph_remove_row(list,aux->data->node,aux2->data->node);
+           graph_remove_row(list, removedRow->node, aux->data->node);
+           }*/
+        // else if (!graph_row_is_a_bridge(list,aux->data->node,aux2->data->node)){
+        removedRow = graph_remove_row(graph,aux->data->node,aux2->data->node);
+        removedRow2 =  graph_remove_row(graph, removedRow->node, aux->data->node);
+        path_create_path(graph,path,removedRow->node);
+        aux2 = aux->next;
+        // }
+        // aux2 = aux2->next;
+        // if (aux2 == NULL && aux->next != NULL)
+        //   aux2 = aux->next;
+    }
+    return;
+}
+
+_list_header *graph_tree_centers(_list_header *graph)
+{
+    _list_header *treeCenters = list_create();
+    _list_header *graphcpy = graph_create();
+    int i = 1<<16;
+    _list_data treeCenter;
+    int eccentricity = 0;
+    if (graph_is_a_tree(graphcpy)){
+        _list_member *aux2, *aux = graph->first;
+        while(aux != NULL){
+            dfs_header(graph, aux->data->node);
+            aux2 = graph->first;
+            while(aux2 != NULL){
+                if (aux2->data->visited >= eccentricity){
+                    eccentricity = aux2->data->visited;
+                }
+                aux2=aux2->down;
+            }
+            if (eccentricity < i)
+                i = eccentricity;
+            aux = aux->down;
+
+            eccentricity = 0;
+        }
+        aux = graph->first;
+        eccentricity = 0;
+        while(aux != NULL){
+            dfs_header(graph, aux->data->node);
+            aux2 = graph->first;
+            while(aux2 != NULL){
+                if (aux2->data->visited >= eccentricity){
+                    treeCenter.visited = aux2->data->visited;
+                    treeCenter.node = aux->data->node;
+                   // printf("node: %d, e : %d\n",treeCenter.node,treeCenter.visited);
+                }
+                aux2=aux2->down;
+            }
+                    if (treeCenter.visited == i-1){
+                        path_add_row_end(treeCenters, &treeCenter);
+                    }
+            aux = aux->down;
+            eccentricity = 0;
+        }
+        return treeCenters;
+
+    }
+    puts("The graph is not a tree\n");
+    return NULL;
+
 }
