@@ -49,4 +49,5 @@ void eulerian_circle(_list_header *, _list_header *, int); // Recursive function
 int graph_is_a_tree(_list_header *); // Returns 1 if the graph is a tree, returns 0 otherwise
 void path_create_path (_list_header *, _list_header *, int); // Function to create a path of a connected graph, adding all the rows avaliable. It is used to check if the graph is a tree.
 _list_header *graph_tree_centers(_list_header *); // Returns the centers of a tree
+int graph_number_of_components (_list_header *); // Returns the number of components.
 #endif

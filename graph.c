@@ -307,10 +307,10 @@ int graph_is_connected (_list_header *list)
     dfs_header(list,aux->data->node);
     while(aux!= NULL){
         //printf("The current node being analyzed is: %d, and its visited status is: %d\n",aux->data->node,aux->data->visited);
-        if (aux->data->visited == 0){
+        if (aux->data->visited == 0){ // If there's a vertex which hasn't been visited, this means that the graph is not connected, and we turn the flag on
             flag = 1;
-            i++;
-            dfs(list,aux->data->node,1);
+            i++; // Increment the number of components
+            dfs(list,aux->data->node,1); // Apply the dfs again on the non-visited vertex, and start check again.
             puts("\n");
         }
         aux = aux->down;
@@ -323,23 +323,21 @@ int graph_is_connected (_list_header *list)
     return 1;
 }
 
-int graph_number_of_components (_list_header *list)
-{
-    int i = 1;
+int graph_number_of_components (_list_header *list){ // Similar to the "graph_is_connected" function,
+    int i = 1;                                       // the only difference is that the focus of this function is to return the number of components
     _list_member *aux = list->first;
     dfs_header(list,aux->data->node);
     while(aux!= NULL){
         if (aux->data->visited == 0){
             i++;
             dfs(list,aux->data->node,1);
-            puts("\n");
         }
         aux = aux->down;
     }
     return i;
 }
 
-_list_data *graph_remove_row(_list_header *list, int node, int row)
+_list_data *graph_remove_row(_list_header *list, int node, int row) // Removes the given row at the given node/vertex
 {
     _list_member *aux, *aux2;
     _list_data *removedRow;
@@ -371,16 +369,16 @@ int graph_row_is_a_bridge(_list_header *list, int node, int row)
     _list_member *aux = list->first;
     _list_data *testedRow;
     int n1, n2;
-    n1 = graph_number_of_components(list);
+    n1 = graph_number_of_components(list); // Count the number of components with the row
     testedRow = graph_remove_row(list,node,row);
-    n2 = graph_number_of_components(list);
+    n2 = graph_number_of_components(list); // Counter the number of components without the row
     graph_add_row(list,testedRow,node);
-    if (n2 > n1)
+    if (n2 > n1) // If the number of components increased after the row removal, then the row is a bridge.
         return 1;
     return 0;
 }
 
-int graph_degree_counter(_list_header *list)
+int graph_degree_counter(_list_header *list) // very simple function to count the sum of the degrees of all the vertices of the graph
 {
     int degreeCounter = 0;
     _list_member *aux2, *aux = list->first;
@@ -395,18 +393,18 @@ int graph_degree_counter(_list_header *list)
     return degreeCounter;
 }
 
-_list_header *graph_has_eulerian_circle(_list_header *list)
-{
-    if(graph_is_connected(list)){
+_list_header *graph_has_eulerian_circle(_list_header *list) // This function is the wrapper, it set the things up for the
+{                                                           // iterations of the fleury's algorithm
+    if(graph_is_connected(list)){ // First check if the graph is connected
         _list_header *path = list_create();
         _list_member *aux2, *aux = list->first;
-        eulerian_circle(list,path,aux->data->node);
-        aux = path->first;
+        eulerian_circle(list,path,aux->data->node); // Starts the iterations
+        aux = path->first; // Get the initial vertex
         aux2 = aux;
         while(aux2->next!=NULL)
-            aux2=aux2->next;
-        if (aux->data->node != aux2->data->node){
-            puts("The graph doesn't contain an eulerian circle\n");
+            aux2=aux2->next; // go to the end of the path
+        if (aux->data->node != aux2->data->node){ // If the last vertex of the path is not the first...
+            puts("The graph doesn't contain an eulerian circle\n"); // Then the graph doesn't contain an eulerian circle
             return path;
         }
         puts("The graph contains an eulerian circle\n");
@@ -416,9 +414,9 @@ _list_header *graph_has_eulerian_circle(_list_header *list)
     return NULL;
 }
 
-void eulerian_circle(_list_header *list, _list_header *path, int row)
-{
-    _list_member *aux2, *aux = list->first;
+void eulerian_circle(_list_header *list, _list_header *path, int row) // If the graph contains an eulerian circle, this function
+{                                                                     // Will successfully create a path starting and ending on
+    _list_member *aux2, *aux = list->first;                           // the same vertex and passing through all the rows
     _list_data *removedRow;
     while(aux != NULL && aux->data->node != row)
         aux = aux->down;
@@ -426,22 +424,22 @@ void eulerian_circle(_list_header *list, _list_header *path, int row)
         puts("node not inserted on the list");
         return;
     }
-    path_add_row_end(path,aux->data);
+    path_add_row_end(path,aux->data); // Add the vertex of destination of the last row removed.
     aux2 = aux->next;
     while (aux2 != NULL){
-        if (aux->next->next == NULL){
-            removedRow = graph_remove_row(list,aux->data->node,aux2->data->node);
+        if (aux->next->next == NULL){ // If the row is the last incident row of the vertex...
+            removedRow = graph_remove_row(list,aux->data->node,aux2->data->node); // it will mandatorily remove it
             graph_remove_row(list, removedRow->node, aux->data->node);
-            eulerian_circle(list,path,removedRow->node);
+            eulerian_circle(list,path,removedRow->node); // go to the next row
         }
-        else if (!graph_row_is_a_bridge(list,aux->data->node,aux2->data->node)){
+        else if (!graph_row_is_a_bridge(list,aux->data->node,aux2->data->node)){ // If the row is not a bridge, it can be removed
             removedRow = graph_remove_row(list,aux->data->node,aux2->data->node);
             graph_remove_row(list, removedRow->node, aux->data->node);
             aux2 = aux->next;
             eulerian_circle(list,path,removedRow->node);
         }
-        aux2 = aux2->next;
-        if (aux2 == NULL && aux->next != NULL)
+        aux2 = aux2->next; // otherwise go to the next one
+        if (aux2 == NULL && aux->next != NULL) // just a basic check if the aux2 didn't get lost while roaming through the rows
             aux2 = aux->next;
     }
     return;
@@ -491,7 +489,7 @@ int path_add_row_end(_list_header *list, _list_data *data)
     return 0;
 }
 
-void path_print(_list_header *path)
+void path_print(_list_header *path) // print the path, very similar to the list_print one
 {
     if (path != NULL){
         _list_member *aux=path->first;
@@ -506,7 +504,7 @@ void path_print(_list_header *path)
     return;
 }
 
-void list_purge(_list_header *path)
+void list_purge(_list_header *path) // purges the list or the path...
 {
     if (path != NULL && !list_empty(path)){
         _list_member *aux2, *aux, *aux3 = path->first;
@@ -532,12 +530,12 @@ int graph_is_a_tree(_list_header *graph)
     }
     _list_member *aux2, *aux = graph->first;
     _list_header *path = list_create();
-    path_create_path(graph, path, aux->data->node);
+    path_create_path(graph, path, aux->data->node); // Check every possible row and its destination vertex
     aux = path->first;
-    while(aux != NULL){
+    while(aux != NULL){ // These two loops compare every single combination of two connections of the graph
         aux2 = path->first;
         while(aux2 != NULL){
-            if (aux != aux2 && aux2->data->node == aux->data->node)
+            if (aux != aux2 && aux2->data->node == aux->data->node) // If there's two connections which leads to the same vertex, and they're connected, then the graph is not a tree, for it has a cicle.
                 return 0;
             aux2= aux2->next;
         }
@@ -546,8 +544,8 @@ int graph_is_a_tree(_list_header *graph)
     return 1;
 }
 
-void path_create_path (_list_header *graph, _list_header *path, int row)
-{
+void path_create_path (_list_header *graph, _list_header *path, int row) // Almost identical to the eulerian_circle algorithm, the only difference being that this function doesn't
+{                                                                        // check if the rows are bridges
     _list_member *aux2, *aux = graph->first;
     _list_data *removedRow2, *removedRow;
     while(aux != NULL && aux->data->node != row)
@@ -579,30 +577,29 @@ void path_create_path (_list_header *graph, _list_header *path, int row)
 _list_header *graph_tree_centers(_list_header *graph)
 {
     _list_header *treeCenters = list_create();
-    _list_header *graphcpy = graph_create();
-    int i = 1<<16;
+    _list_header *graphcpy = graph_create(); // creates a copy of the graph, because the function to check if the graph is a tree destroys the graph.
+    int i = 1<<16; // the initial smallest eccentricity
     _list_data treeCenter;
-    int eccentricity = 0;
-    if (graph_is_a_tree(graphcpy)){
+    int eccentricity = 0; // the biggest path of each vertex
+    if (graph_is_a_tree(graphcpy)){ // First, check if the graph is a tree...
         _list_member *aux2, *aux = graph->first;
         while(aux != NULL){
-            dfs_header(graph, aux->data->node);
+            dfs_header(graph, aux->data->node); // Calculate the path length of all the vertices from the initial one, and do this to all the vertices in the graph
             aux2 = graph->first;
             while(aux2 != NULL){
-                if (aux2->data->visited >= eccentricity){
+                if (aux2->data->visited >= eccentricity){ // Get the biggest path parting from the current vertex being analyzed
                     eccentricity = aux2->data->visited;
                 }
                 aux2=aux2->down;
             }
-            if (eccentricity < i)
+            if (eccentricity < i) // Get the smallest eccentricity from all the vertices
                 i = eccentricity;
             aux = aux->down;
-
-            eccentricity = 0;
+            eccentricity = 0; // set the eccentricity to 0 to check the next vertex
         }
         aux = graph->first;
         eccentricity = 0;
-        while(aux != NULL){
+        while(aux != NULL){ // now we check each one of the vertices has the smallest eccentricity already calculated
             dfs_header(graph, aux->data->node);
             aux2 = graph->first;
             while(aux2 != NULL){
@@ -613,8 +610,8 @@ _list_header *graph_tree_centers(_list_header *graph)
                 }
                 aux2=aux2->down;
             }
-                    if (treeCenter.visited == i-1){
-                        path_add_row_end(treeCenters, &treeCenter);
+                    if (treeCenter.visited == i-1){ // If it has the smallest eccentricity... (it has to be i-1 because the visited status starts with 1, and not 0)
+                        path_add_row_end(treeCenters, &treeCenter); // add to the tree centers list
                     }
             aux = aux->down;
             eccentricity = 0;
