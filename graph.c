@@ -16,7 +16,7 @@ int list_add_begining(_list_header *list, _list_data *data){
     _list_data *datanew=(_list_data*)malloc(sizeof(_list_data));
     if(new!=NULL && datanew!=NULL){
         memcpy(datanew,data,sizeof(_list_data));
-        new->data=datanew;
+    new->data=datanew;
         new->down=list->first;
         new->prev=NULL;
         new->up=NULL;
@@ -90,40 +90,34 @@ _list_header *graph_create()
     char *str;
     char *str2;
     _list_header *list = list_create();
-    _list_data aux;
-    int u, no_nodes, i, degree_counter = 0;
-    u = 0;
-    i = 0;
-    no_nodes = line_counter(entrada);
-    int m = no_nodes*4 + 1;
-    if ((str =(char*)malloc(m*sizeof(char))) == NULL)
-        exit(EXIT_FAILURE);
-    str[m] = '\0';
-    while (!feof(entrada)){
-        if (fgets(str,m,entrada) != "\n"){
-            str2 = strtok(str,":");
+    _list_data aux, aux2;
+    int no_nodes = line_counter(entrada); // The no_nodes variable is used to get the number of lines of the file, and consequently, the number of Vertices
+    int m = no_nodes*4 + 1;                           // the m variable is used to allocate space for the array which will capture the lines of the file,
+    if ((str =(char*)malloc(m*sizeof(char))) == NULL) // Considering that the graph is a simple graph, and a vertex has a row to all the other
+        exit(EXIT_FAILURE);                           // vertices, then the maximum line length is 4*no_nodes +1.
+    str[m] = '\0';                                    // In case the graph is not a simple graph, the multiplier factor must be increased.
+    while (!feof(entrada)){ // This loop will catch line per line of the file
+        if (fgets(str,m,entrada) != "\n"){ // Check if the line is not a blank line
+            str2 = strtok(str,":"); // This separates the vertex from its rows
             aux.node = atoi(str2);
             aux.weight = 0;
-            list_add_end(list,&aux);
-            while((str2 != NULL)){
-                str2 = strtok(NULL, "-");
-                //puts(str2);
+            list_add_end(list,&aux); // Add the caught vertex
+            while((str2 != NULL)){ // This loop catches all the rows of the current vertex, and their respectives weights
+                str2 = strtok(NULL, "-"); // All the rows are separated by their weights with a "-" symbol, so the first strtok will catch the row,
+                //puts(str2);             // Whilst the second one will catch its weight
                 //puts("\n");
                 if (str2 != NULL){
-                    aux.node = atoi(str2);
+                    aux2.node = atoi(str2);
                 }
                 //printf("No %d\n",aux.node);
-                str2 = strtok(NULL, " ");
+                str2 = strtok(NULL, " "); // second strtok
                 //puts(str2);
                 //puts("\n");
                 if (str2 != NULL){
-                    aux.weight = atoi(str2);
-                    degree_counter++;
-                    graph_add_row(list,&aux,u);
+                    aux2.weight = atoi(str2);
+                    graph_add_row(list,&aux2,aux.node); // With the wanted data captured, adds the row to the adjacency list of the current vertex.
                 }
             }
-            degree_counter = 0;
-            u++;
         }
     }
     free(str);
@@ -176,20 +170,18 @@ int line_counter (FILE * fp)
     char sample_chr;
     int no_lines = 0;
     rewind(fp);
-    sample_chr = getc(fp);
-
-    while (sample_chr != EOF)
+    sample_chr = getc(fp); // get the first char of the file
+    while (sample_chr != EOF) // Check every single char of the file
     {
 
-        if (sample_chr == ':'){
-            //sempre que for encontrado o símbolo ':', o número de linhas acrescentará, pois todas as linhas possuem este símbolo
-            no_lines++;
+        if (sample_chr == ':'){ // It is simpler to use the ':' symbol rather than a \n, because every line of the file has only one ':' symbol
+            no_lines++;         // So whenever it is captured by the 'sample_chr' variable, the line counter is increased.
         }
 
         sample_chr = getc(fp);
     }
     rewind(fp);
-    return no_lines;
+    return no_lines; // return the number of lines
 }
 
 void print_vector(int *vec,int n){
@@ -211,6 +203,11 @@ void print_matrix(int **matrix, int m, int n)
     }
 }
 
+/* ***************************************************************************
+ * The logic of the adjacency function is very similar of the adjacency list,*
+ * the only changes are how the data is capture with the strtok function, and*
+ * the rows are inserted on a matrix, rather on a list
+ * ***************************************************************************/
 int **create_adjacency_matrix(void)
 {
     FILE * entrada = fopen ("graph.txt", "r");
@@ -224,33 +221,35 @@ int **create_adjacency_matrix(void)
     if ((str =(char*)malloc(m*sizeof(char))) == NULL)
         exit(EXIT_FAILURE);
     str[m] = '\0';
-
+    /**********************************************************************************************************************/
+    //Allocation of the adjacency matrix, based on the number of lines of the file, in other words, the number of vertices
     if ((matrix = (int **)malloc(n*sizeof(int*)))!= NULL){
         for (i = 0; i < n; i++){
             if((matrix[i] = (int*)malloc(n*sizeof(int*))) == NULL){
-                printf("falha na alocação\n");
+                printf("Failure in allocation\n");
                 exit(EXIT_FAILURE);
             }
         }
     } else {
-        printf("falha na alocação\n");
+        printf("Failure in allocation\n");
         exit(EXIT_FAILURE);
     }
+    /**********************************************************************************************************************/
     for (i = 0; i < n; i++){
         for (j = 0; j < n; j++)
             matrix[i][j] = 0;
     }
     while (!feof(entrada)){
         fgets(str,m,entrada);
-        if (str2 != NULL){ //Esta parte do código pega linha por linha para analisar todas as adjacências do grafo
-            str2 = strtok(str,":"); //Separando o vértice da vez que sempre será o número que vem antes do símbolo ':'
+        if (str2 != NULL){
+            str2 = strtok(str,":"); // Separation of the vertex from its rows
             i = atoi(str2);
-            while((str2 != NULL)){ // este laço serve para capturar todos os vértices vizinhos do vértice que está sendo analisado
-                str2 = strtok(NULL, " ");
+            while((str2 != NULL)){
+                str2 = strtok(NULL, " "); // Capture of each of the rows of the current vertex
                 if (str2 != NULL){
                     j = atoi(str2);
-                    matrix[i][j]++; // acrescenta +1 para cada vez que a ligação entre dois vértices for encontrada
-                    u++; // a variável 'u' contará o número de arestas
+                    matrix[i][j]++;
+                    u++;
                 }
             }
         }
@@ -267,15 +266,15 @@ void dfs_header(_list_header *list, int node)
     }
     _list_member *aux = list->first;
     _list_member *aux2 = aux;
-    while (aux != NULL){
+    while (aux != NULL){ // Set all the visited status to 0
         aux->data->visited = 0;
         aux = aux->down;
     }
-    dfs(list,node, 1);
+    dfs(list,node,1); // Start the dfs iterations at the given node/vertex
     return;
 }
 
-void dfs(_list_header *list, int n, int counter)
+void dfs(_list_header *list, int n, int counter) // the 'counter' integer is used to set the visited status of the vertices
 {
     _list_member *aux2 = list->first;
     _list_member *aux = NULL;
@@ -287,8 +286,8 @@ void dfs(_list_header *list, int n, int counter)
     }
     if (aux2->data->visited == 0){
         aux2->data->visited = counter;
-        counter++;
-    }
+        counter++; // Everytime a non-visited vertex is encountered, the counter is increased, thus,
+    }              // the path length to all the vertices, parting from the initial one, will be given.
     else
         return;
     aux = aux2->next;
