@@ -640,3 +640,16 @@ void tree_print_children(_list_header *graph, int node)
     }
     puts("\n");
 }
+
+void tree_print_descendants(_list_header *graph, int node)
+{
+    _list_member *aux2, *aux = graph->first;
+    while (aux != NULL && aux->data->node != node)
+        aux = aux->down;
+    if (aux == NULL){
+        puts("Non-existent node\n");
+        return;
+    }
+   // printf("Descendants %d : \n",aux->data->node);
+
+}
