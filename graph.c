@@ -621,5 +621,22 @@ _list_header *graph_tree_centers(_list_header *graph)
     }
     puts("The graph is not a tree\n");
     return NULL;
+}
 
+void tree_print_children(_list_header *graph, int node)
+{
+    _list_member *aux = graph->first;
+    while (aux != NULL && aux->data->node != node)
+        aux = aux->down;
+    if (aux == NULL){
+        puts("Non-existent node\n");
+        return;
+    }
+    printf("Children of %d : \n",aux->data->node);
+    aux = aux->next;
+    while(aux != NULL){
+        printf("%2d ",aux->data->node);
+        aux = aux->next;
+    }
+    puts("\n");
 }
