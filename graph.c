@@ -650,6 +650,17 @@ void tree_print_descendants(_list_header *graph, int node)
         puts("Non-existent node\n");
         return;
     }
-   // printf("Descendants %d : \n",aux->data->node);
-
+    // printf("Descendants %d : \n",aux->data->node);
+    if (aux->data->visited != 1){
+        aux->data->visited = 1;
+        printf("%3d", aux->data->node);
+    } else {
+        return;
+    }
+    aux2 = aux->next;
+    while(aux2 != NULL){
+        tree_print_descendants(graph, aux2->data->node);
+        aux2 = aux2->next;
+    }
+    return;
 }
