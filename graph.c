@@ -16,7 +16,7 @@ int list_add_begining(_list_header *list, _list_data *data){
     _list_data *datanew=(_list_data*)malloc(sizeof(_list_data));
     if(new!=NULL && datanew!=NULL){
         memcpy(datanew,data,sizeof(_list_data));
-    new->data=datanew;
+        new->data=datanew;
         new->down=list->first;
         new->prev=NULL;
         new->up=NULL;
@@ -97,7 +97,7 @@ _list_header *graph_create()
         exit(EXIT_FAILURE);                           // vertices, then the maximum line length is 4*no_nodes +1.
     str[m] = '\0';                                    // In case the graph is not a simple graph, the multiplier factor must be increased.
     while (!feof(entrada)){ // This loop will catch line per line of the file
-        if (fgets(str,m,entrada) != "\n"){ // Check if the line is not a blank line
+        if (fgets(str,m-1,entrada) != "\n"){ // Check if the line is not a blank line
             str2 = strtok(str,":"); // This separates the vertex from its rows
             aux.node = atoi(str2);
             aux.weight = 0;
@@ -292,7 +292,7 @@ void dfs(_list_header *list, int n, int counter) // the 'counter' integer is use
         return;
     aux = aux2->next;
     while (aux != NULL) {
-       // printf("%d --> %d path length: %d\n",aux2->data->node, aux->data->node, aux2->data->visited);
+        // printf("%d --> %d path length: %d\n",aux2->data->node, aux->data->node, aux2->data->visited);
         dfs(list,aux->data->node,counter);
         aux = aux->next;
     }
@@ -606,13 +606,13 @@ _list_header *graph_tree_centers(_list_header *graph)
                 if (aux2->data->visited >= eccentricity){
                     treeCenter.visited = aux2->data->visited;
                     treeCenter.node = aux->data->node;
-                   // printf("node: %d, e : %d\n",treeCenter.node,treeCenter.visited);
+                    // printf("node: %d, e : %d\n",treeCenter.node,treeCenter.visited);
                 }
                 aux2=aux2->down;
             }
-                    if (treeCenter.visited == i-1){ // If it has the smallest eccentricity... (it has to be i-1 because the visited status starts with 1, and not 0)
-                        path_add_row_end(treeCenters, &treeCenter); // add to the tree centers list
-                    }
+            if (treeCenter.visited == i-1){ // If it has the smallest eccentricity... (it has to be i-1 because the visited status starts with 1, and not 0)
+                path_add_row_end(treeCenters, &treeCenter); // add to the tree centers list
+            }
             aux = aux->down;
             eccentricity = 0;
         }
@@ -653,7 +653,7 @@ void tree_print_descendants(_list_header *graph, int node)
     // printf("Descendants %d : \n",aux->data->node);
     if (aux->data->visited != 1){
         aux->data->visited = 1;
-        printf("%3d", aux->data->node);
+        printf("%2d", aux->data->node);
     } else {
         return;
     }
@@ -663,4 +663,41 @@ void tree_print_descendants(_list_header *graph, int node)
         aux2 = aux2->next;
     }
     return;
+}
+
+void tree_print_ancestors(_list_header *graph, int node, int target)
+{
+    _list_member *aux2, *aux3, *aux = graph->first;
+    while (aux != NULL){
+        if (aux->data->node != target){
+            aux2 = aux->next;
+            while (aux2 != NULL){
+                if (aux2->data->node == node){
+                    if (aux2->data->node == target){
+                        printf("%2d", aux->data->node);
+                        aux->data->visited = 1;
+                        tree_print_ancestors(graph,aux->data->node,target);
+                        // break;
+                    } else {
+                        aux3 = graph->first;
+                        while (aux3 != NULL && aux3->data->node != aux2->data->node)
+                            aux3 = aux3->down;
+                        if(aux3 == NULL)
+                            return;
+                        if (aux->data->visited != 1){
+                            //aux3->data->visited = 1;
+                            printf("%2d", aux->data->node);
+                            aux->data->visited = 1;
+                            tree_print_ancestors(graph,aux->data->node,target);
+                            // break;
+                        } else {
+                            return;
+                        }
+                    }
+                }
+                aux2 = aux2->next;
+            }
+        }
+        aux = aux->down;
+    }
 }

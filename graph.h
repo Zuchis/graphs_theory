@@ -50,4 +50,7 @@ int graph_is_a_tree(_list_header *); // Returns 1 if the graph is a tree, return
 void path_create_path (_list_header *, _list_header *, int); // Function to create a path of a connected graph, adding all the rows avaliable. It is used to check if the graph is a tree.
 _list_header *graph_tree_centers(_list_header *); // Returns the centers of a tree
 int graph_number_of_components (_list_header *); // Returns the number of components.
+void tree_print_ancestors(_list_header *, int, int);
+void tree_print_descendants(_list_header *, int);
+void tree_print_children(_list_header *, int);
 #endif
