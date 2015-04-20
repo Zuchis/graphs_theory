@@ -85,6 +85,17 @@ int graph_add_row(_list_header *list, _list_data *data, int pos){
     return 0;
 }
 
+int node_counter(_list_header *graph)
+{
+    _list_member *aux = graph->first;
+    int i = 0;
+    while(aux != NULL){
+        i++;
+        aux = aux->down;
+    }
+    return i;
+}
+
 int get_row_count (_list_header *graph, int node)
 {
     _list_member *aux = graph->first;
@@ -172,7 +183,7 @@ void graph_print(_list_header *list){
             printf("%d --> ", aux->data->node);
             while(aux->next!=NULL){
                 aux=aux->next;
-                printf("%d (%d) --> ",aux->data->node,aux->data->weight);
+                printf("%d (%2.2lf) --> ",aux->data->node,aux->data->weight);
             }
             puts("//\n");
             aux2=aux2->down;
@@ -211,7 +222,7 @@ void print_vector(int *vec,int n){
     puts("\n");
 }
 
-void print_matrix(int **matrix, int m, int n)
+void print_int_matrix(int **matrix, int m, int n)
 {
     int i, j;
     for (i = 0; i < m; i++){
@@ -222,6 +233,16 @@ void print_matrix(int **matrix, int m, int n)
     }
 }
 
+void print_double_matrix(double **matrix, int m, int n)
+{
+    int i, j;
+    for (i = 0; i < m; i++){
+        for (j = 0; j < n; j++){
+            printf("%3.1lf   ",matrix[i][j]);
+        }
+        puts("\n");
+    }
+}
 /* ***************************************************************************
  * The logic of the adjacency function is very similar of the adjacency list,*
  * the only changes are how the data is capture with the strtok function, and*
@@ -390,7 +411,7 @@ int graph_row_is_a_bridge(_list_header *list, int node, int row)
     int n1, n2;
     n1 = graph_number_of_components(list); // Count the number of components with the row
     testedRow = graph_remove_row(list,node,row);
-    n2 = graph_number_of_components(list); // Counter the number of components without the row
+    n2 = graph_number_of_components(list); // Count the number of components without the row
     graph_add_row(list,testedRow,node);
     if (n2 > n1) // If the number of components increased after the row removal, then the row is a bridge.
         return 1;
@@ -739,7 +760,7 @@ void tree_pre_order (_list_header *graph, _list_header *route, int node)
     }
     aux2 = aux->next;
     while(aux2 != NULL){
-       // path_add_row_end(route, aux2->data);
+        // path_add_row_end(route, aux2->data);
         tree_pre_order(graph, route, aux2->data->node);
         aux2 = aux2->next;
     }
@@ -755,11 +776,11 @@ void tree_in_order (_list_header *graph, _list_header *route, int node)
         return;
     }
     if (aux->data->visited != 1){
-      aux->data->visited = 1;
+        aux->data->visited = 1;
         if (aux->next->next == NULL || aux->next == NULL){
             path_add_row_end(route, aux->data);
             if (aux != graph->first)
-            return;
+                return;
         }
     } else {
         return;
@@ -824,4 +845,88 @@ void graph_reset_visited_status(_list_header *graph)
         aux->data->visited = 0;
         aux = aux->down;
     }
+}
+
+int allMarked(int *selected, int n) // returns 1 if all the vertices have been marked, returns 0 otherwise
+{
+    int i, flag = 1;
+    for (i = 0; i < n; i++){
+        if (selected[i] == 0){
+            flag = 0;
+            break;
+        }
+    }
+    return flag;
+}
+
+_list_header *dijkstra (_list_header *graph, int node) // returns the spanning tree for the given graph, the variable 'node' is the initial node for the algorithm
+{
+    _list_header *spanningTree = list_create();
+    _list_member *aux2, *aux = graph->first;
+    _list_data new;
+    // the variable 'n' contains the number of nodes/vertices of the graph.
+    int n = node_counter(graph), i, next, smallest, j, veryBigNumber = 1<<16;
+    double *est =(double*)malloc(sizeof(double) * n);
+    int  *pred =(int*)malloc(sizeof(int) * n), *selected =(int*)malloc(sizeof(int) * n);
+    double **weights = (double **)malloc(sizeof(double*) * n);
+    for (i = 0; i < n; i++){
+        weights[i] = (double*)malloc(sizeof(double) * n);
+    }
+    if (est == NULL || pred == NULL){
+        puts("lewl the allocation failed, try harder scrub\n");
+        exit(EXIT_FAILURE);
+    }
+    for (i = 0; i < n; i++){
+        est[i] = veryBigNumber;  // initializing the estimated best path vector, with a very big number (2^16)
+        pred[i] = -1;            // initializing the predecessors vector, all with -1
+        selected[i] = 0;         // initializing the selected vector, which will be used to mark the vertex that already has the algorithm applied
+        for (j = 0; j < n; j++){
+            weights[i][j] = -1;  // initializing the matrix which will contain all the weights of the rows of the graph
+        }
+    }
+    est[node] = 0;
+    // putting all the weights into a matrix for quicker and easier access
+    while (aux != NULL){
+        aux2 = aux->next;
+        while(aux2 != NULL){
+            weights[aux->data->node][aux2->data->node] = aux2->data->weight;
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    //print_double_matrix(weights,n,n);
+    i = node; // start the iterations with the initial node
+    while (!allMarked(selected, n)){
+        selected[i] = 1; // mark the vertex of the current iteration
+        smallest = veryBigNumber; // the variable 'smallest' will determine what is the smallest estimated way,
+        for (j = 0; j < n; j++){  // thus providing the next vertex for the next iteration
+            if (j != node){
+                if (weights[i][j] != -1){  // Here is the relaxing process...
+                    if (est[j] > est[i] + weights[i][j]){
+                        est[j] =  est[i] + weights[i][j];
+                        pred[j] = i;
+                    }
+                }
+            }
+        }
+        for (j = 0; j < n; j++){ // check the best estimated way for all the vertices that hasn't been marked yet...
+            if (est[j] < smallest && selected[j] != 1){ // check if the vertex hasn't been marked, this will guarantee that the algorithm do exactly n = number of vertices iterations
+                smallest = est[j];
+                next = j;
+            }
+        }
+        i = next;  // ... and send it to the next iteration
+    }
+    for (i = 0; i < n; i++){ // spanning tree creation
+        new.node = i;
+        list_add_end(spanningTree, &new);
+        for (j = 0; j < n; j++){
+            if(pred[j] == i && j != node){
+                new.node = j;
+                new.weight = est[j] - est[i];
+                graph_add_row(spanningTree, &new, i);
+            }
+        }
+    }
+    return spanningTree;
 }

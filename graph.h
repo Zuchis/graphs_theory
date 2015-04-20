@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+enum {a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z};
 typedef struct{  // All the data used in the functions to manipulate a graph
     int node;
-    int weight;
+    double weight;
     int visited;
 }_list_data;
 
@@ -58,4 +58,8 @@ void list_purge(_list_header *);// purges the list or the path...
 void tree_in_order (_list_header *, _list_header *, int);
 void tree_post_order (_list_header *, _list_header *, int);
 void graph_reset_visited_status(_list_header *);
+int node_counter(_list_header *);
+int allMarked(int *, int); // returns 1 if all the vertices have been marked, returns 0 otherwise
+_list_header *dijkstra (_list_header *, int); // returns the spanning tree for the given graph
+void print_double_matrix(double **, int , int );
 #endif
