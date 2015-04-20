@@ -84,6 +84,25 @@ int graph_add_row(_list_header *list, _list_data *data, int pos){
     }
     return 0;
 }
+
+int get_row_count (_list_header *graph, int node)
+{
+    _list_member *aux = graph->first;
+    while (aux != NULL && aux->data->node != node)
+        aux = aux->down;
+    if (aux == NULL){
+        puts("Non-existent node");
+        return 0;
+    }
+    int i = 0;
+    aux = aux->next;
+    while(aux != NULL){
+        i++;
+        aux = aux->next;
+    }
+    return i;
+}
+
 _list_header *graph_create()
 {
     FILE * entrada = fopen ("graph.txt", "r");
@@ -145,7 +164,7 @@ int list_size(_list_header* list){
     return i;
 }
 
-void list_print(_list_header *list){
+void graph_print(_list_header *list){
     if(list->first != NULL){
         _list_member *aux=list->first;
         _list_member *aux2 = aux;
@@ -489,7 +508,7 @@ int path_add_row_end(_list_header *list, _list_data *data)
     return 0;
 }
 
-void path_print(_list_header *path) // print the path, very similar to the list_print one
+void path_print(_list_header *path) // print the path, very similar to the graph_print one
 {
     if (path != NULL){
         _list_member *aux=path->first;
@@ -517,6 +536,7 @@ void list_purge(_list_header *path) // purges the list or the path...
                 if(aux2 != NULL)
                     aux2 = aux2->next;
             }
+            aux3 = NULL;
             aux3 = aux3->down;
         }
     }
@@ -698,6 +718,110 @@ void tree_print_ancestors(_list_header *graph, int node, int target)
                 aux2 = aux2->next;
             }
         }
+        aux = aux->down;
+    }
+}
+
+void tree_pre_order (_list_header *graph, _list_header *route, int node)
+{
+    _list_member *aux2, *aux = graph->first;
+    while (aux != NULL && aux->data->node != node)
+        aux = aux->down;
+    if(aux == NULL){
+        puts("Node not found");
+        return;
+    }
+    if (aux->data->visited != 1){
+        aux->data->visited = 1;
+        path_add_row_end(route, aux->data);
+    } else {
+        return;
+    }
+    aux2 = aux->next;
+    while(aux2 != NULL){
+       // path_add_row_end(route, aux2->data);
+        tree_pre_order(graph, route, aux2->data->node);
+        aux2 = aux2->next;
+    }
+}
+
+void tree_in_order (_list_header *graph, _list_header *route, int node)
+{
+    _list_member *aux2, *aux = graph->first;
+    while (aux != NULL && aux->data->node != node)
+        aux = aux->down;
+    if(aux == NULL){
+        puts("Node not found");
+        return;
+    }
+    if (aux->data->visited != 1){
+      aux->data->visited = 1;
+        if (aux->next->next == NULL || aux->next == NULL){
+            path_add_row_end(route, aux->data);
+            if (aux != graph->first)
+            return;
+        }
+    } else {
+        return;
+    }
+    int i, n = get_row_count(graph, aux->data->node);
+    aux2 = aux->next;
+    if ((n % 2) == 0){
+        for (i = 0; i < n/2; i++){
+            tree_in_order(graph, route, aux2->data->node);
+            aux2 = aux2->next;
+        }
+        path_add_row_end(route, aux->data);
+        for (i = n/2; i < n; i++){
+            tree_in_order(graph, route, aux2->data->node);
+            aux2 = aux2->next;
+        }
+    } else {
+        for (i = 0; i < (n/2); i++){
+            tree_in_order(graph, route, aux2->data->node);
+            aux2 = aux2->next;
+        }
+        tree_in_order(graph,route, aux2->data->node);
+        path_add_row_end(route, aux->data);
+        for (i = (n/2)+1; i < n; i++){
+            tree_in_order(graph, route, aux2->data->node);
+            aux2 = aux2->next;
+        }
+    }
+}
+
+void tree_post_order (_list_header *graph, _list_header *route, int node)
+{
+    _list_member *aux2, *aux = graph->first;
+    while (aux != NULL && aux->data->node != node)
+        aux = aux->down;
+    if(aux == NULL){
+        puts("Node not found");
+        return;
+    }
+    if (aux->data->visited != 1){
+        aux->data->visited = 1;
+        if (aux->next->next == NULL){
+            path_add_row_end(route, aux->data);
+            return;
+        }
+    }
+    else {
+        return;
+    }
+    aux2 = aux->next;
+    while(aux2 != NULL){
+        tree_post_order(graph, route, aux2->data->node);
+        aux2 = aux2->next;
+    }
+    path_add_row_end(route, aux->data);
+}
+
+void graph_reset_visited_status(_list_header *graph)
+{
+    _list_member *aux = graph->first;
+    while(aux != NULL){
+        aux->data->visited = 0;
         aux = aux->down;
     }
 }

@@ -29,7 +29,7 @@ int list_empty(_list_header*);  // Return 1 if the list is empty
 int list_add_begining(_list_header*, _list_data*);  // Add an item on the begining of the list, returns thesize, or zero on failure
 void list_add_end(_list_header*,_list_data*); // Add an item on the end of the list and return the size, or zero on failure
 int list_size(_list_header*);   // Return the size of the list
-void list_print(_list_header*); // Print the items in the list
+void graph_print(_list_header*); // Print the items in the list
 int graph_add_row(_list_header*, _list_data*, int); // Add a row to the vertex labeled by the integer value
 int line_counter(FILE*); // returns the number of lines of the entered file, which contains the graph
 void print_vector(int*,int); // print a vector at the given number
@@ -53,4 +53,9 @@ int graph_number_of_components (_list_header *); // Returns the number of compon
 void tree_print_ancestors(_list_header *, int, int);
 void tree_print_descendants(_list_header *, int);
 void tree_print_children(_list_header *, int);
+void tree_pre_order (_list_header *, _list_header *, int);
+void list_purge(_list_header *);// purges the list or the path...
+void tree_in_order (_list_header *, _list_header *, int);
+void tree_post_order (_list_header *, _list_header *, int);
+void graph_reset_visited_status(_list_header *);
 #endif
