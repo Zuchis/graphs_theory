@@ -58,7 +58,7 @@ void list_add_end(_list_header *list, _list_data *data){
     return;
 }
 
-int graph_add_row(_list_header *list, _list_data *data, int pos){
+int graph_add_edge(_list_header *list, _list_data *data, int pos){
     if ((!list_empty(list)) && (pos < list->size)){
         int i = 0;
         _list_member *new=(_list_member*)malloc(sizeof(_list_member));
@@ -96,7 +96,7 @@ int node_counter(_list_header *graph)
     return i;
 }
 
-int get_row_count (_list_header *graph, int node)
+int get_edge_count (_list_header *graph, int node)
 {
     _list_member *aux = graph->first;
     while (aux != NULL && aux->data->node != node)
@@ -123,17 +123,17 @@ _list_header *graph_create()
     _list_data aux, aux2;
     int no_nodes = line_counter(entrada); // The no_nodes variable is used to get the number of lines of the file, and consequently, the number of Vertices
     int m = no_nodes*4 + 1;                           // the m variable is used to allocate space for the array which will capture the lines of the file,
-    if ((str =(char*)malloc(m*sizeof(char))) == NULL) // Considering that the graph is a simple graph, and a vertex has a row to all the other
+    if ((str =(char*)malloc(m*sizeof(char))) == NULL) // Considering that the graph is a simple graph, and a vertex has a edge to all the other
         exit(EXIT_FAILURE);                           // vertices, then the maximum line length is 4*no_nodes +1.
     str[m] = '\0';                                    // In case the graph is not a simple graph, the multiplier factor must be increased.
     while (!feof(entrada)){ // This loop will catch line per line of the file
         if (fgets(str,m-1,entrada) != "\n"){ // Check if the line is not a blank line
-            str2 = strtok(str,":"); // This separates the vertex from its rows
+            str2 = strtok(str,":"); // This separates the vertex from its edges
             aux.node = atoi(str2);
             aux.weight = 0;
             list_add_end(list,&aux); // Add the caught vertex
-            while((str2 != NULL)){ // This loop catches all the rows of the current vertex, and their respectives weights
-                str2 = strtok(NULL, "-"); // All the rows are separated by their weights with a "-" symbol, so the first strtok will catch the row,
+            while((str2 != NULL)){ // This loop catches all the edges of the current vertex, and their respectives weights
+                str2 = strtok(NULL, "-"); // All the edges are separated by their weights with a "-" symbol, so the first strtok will catch the edge,
                 //puts(str2);             // Whilst the second one will catch its weight
                 //puts("\n");
                 if (str2 != NULL){
@@ -145,7 +145,7 @@ _list_header *graph_create()
                 //puts("\n");
                 if (str2 != NULL){
                     aux2.weight = atoi(str2);
-                    graph_add_row(list,&aux2,aux.node); // With the wanted data captured, adds the row to the adjacency list of the current vertex.
+                    graph_add_edge(list,&aux2,aux.node); // With the wanted data captured, adds the edge to the adjacency list of the current vertex.
                 }
             }
         }
@@ -246,7 +246,7 @@ void print_double_matrix(double **matrix, int m, int n)
 /* ***************************************************************************
  * The logic of the adjacency function is very similar of the adjacency list,*
  * the only changes are how the data is capture with the strtok function, and*
- * the rows are inserted on a matrix, rather on a list
+ * the edges are inserted on a matrix, rather on a list
  * ***************************************************************************/
 int **create_adjacency_matrix(void)
 {
@@ -282,10 +282,10 @@ int **create_adjacency_matrix(void)
     while (!feof(entrada)){
         fgets(str,m,entrada);
         if (str2 != NULL){
-            str2 = strtok(str,":"); // Separation of the vertex from its rows
+            str2 = strtok(str,":"); // Separation of the vertex from its edges
             i = atoi(str2);
             while((str2 != NULL)){
-                str2 = strtok(NULL, " "); // Capture of each of the rows of the current vertex
+                str2 = strtok(NULL, " "); // Capture of each of the edges of the current vertex
                 if (str2 != NULL){
                     j = atoi(str2);
                     matrix[i][j]++;
@@ -377,10 +377,10 @@ int graph_number_of_components (_list_header *list){ // Similar to the "graph_is
     return i;
 }
 
-_list_data *graph_remove_row(_list_header *list, int node, int row) // Removes the given row at the given node/vertex
+_list_data *graph_remove_edge(_list_header *list, int node, int edge) // Removes the given edge at the given node/vertex
 {
     _list_member *aux, *aux2;
-    _list_data *removedRow;
+    _list_data *removededge;
     aux = list->first;
     while(aux != NULL && aux->data->node != node)
         aux = aux->down;
@@ -389,31 +389,31 @@ _list_data *graph_remove_row(_list_header *list, int node, int row) // Removes t
         return NULL;
     }
     aux2 = aux->next;
-    while (aux2 != NULL && aux2->data->node != row)
+    while (aux2 != NULL && aux2->data->node != edge)
         aux2 = aux2->next;
     if (aux2 == NULL){
-        puts("Non-existent row\n");
+        puts("Non-existent edge\n");
         return NULL;
     }
     aux2->prev->next = aux2->next;
     if(aux2->next != NULL)
         aux2->next->prev = aux2->prev;
 
-    removedRow = aux2->data;
+    removededge = aux2->data;
     free(aux2);
-    return removedRow;
+    return removededge;
 }
 
-int graph_row_is_a_bridge(_list_header *list, int node, int row)
+int graph_edge_is_a_bridge(_list_header *list, int node, int edge)
 {
     _list_member *aux = list->first;
-    _list_data *testedRow;
+    _list_data *testededge;
     int n1, n2;
-    n1 = graph_number_of_components(list); // Count the number of components with the row
-    testedRow = graph_remove_row(list,node,row);
-    n2 = graph_number_of_components(list); // Count the number of components without the row
-    graph_add_row(list,testedRow,node);
-    if (n2 > n1) // If the number of components increased after the row removal, then the row is a bridge.
+    n1 = graph_number_of_components(list); // Count the number of components with the edge
+    testededge = graph_remove_edge(list,node,edge);
+    n2 = graph_number_of_components(list); // Count the number of components without the edge
+    graph_add_edge(list,testededge,node);
+    if (n2 > n1) // If the number of components increased after the edge removal, then the edge is a bridge.
         return 1;
     return 0;
 }
@@ -454,38 +454,38 @@ _list_header *graph_has_eulerian_circle(_list_header *list) // This function is 
     return NULL;
 }
 
-void eulerian_circle(_list_header *list, _list_header *path, int row) // If the graph contains an eulerian circle, this function
+void eulerian_circle(_list_header *list, _list_header *path, int edge) // If the graph contains an eulerian circle, this function
 {                                                                     // Will successfully create a path starting and ending on
-    _list_member *aux2, *aux = list->first;                           // the same vertex and passing through all the rows
-    _list_data *removedRow;
-    while(aux != NULL && aux->data->node != row)
+    _list_member *aux2, *aux = list->first;                           // the same vertex and passing through all the edges
+    _list_data *removededge;
+    while(aux != NULL && aux->data->node != edge)
         aux = aux->down;
     if (aux == NULL){
         puts("node not inserted on the list");
         return;
     }
-    path_add_row_end(path,aux->data); // Add the vertex of destination of the last row removed.
+    path_add_edge_end(path,aux->data); // Add the vertex of destination of the last edge removed.
     aux2 = aux->next;
     while (aux2 != NULL){
-        if (aux->next->next == NULL){ // If the row is the last incident row of the vertex...
-            removedRow = graph_remove_row(list,aux->data->node,aux2->data->node); // it will mandatorily remove it
-            graph_remove_row(list, removedRow->node, aux->data->node);
-            eulerian_circle(list,path,removedRow->node); // go to the next row
+        if (aux->next->next == NULL){ // If the edge is the last incident edge of the vertex...
+            removededge = graph_remove_edge(list,aux->data->node,aux2->data->node); // it will mandatorily remove it
+            graph_remove_edge(list, removededge->node, aux->data->node);
+            eulerian_circle(list,path,removededge->node); // go to the next edge
         }
-        else if (!graph_row_is_a_bridge(list,aux->data->node,aux2->data->node)){ // If the row is not a bridge, it can be removed
-            removedRow = graph_remove_row(list,aux->data->node,aux2->data->node);
-            graph_remove_row(list, removedRow->node, aux->data->node);
+        else if (!graph_edge_is_a_bridge(list,aux->data->node,aux2->data->node)){ // If the edge is not a bridge, it can be removed
+            removededge = graph_remove_edge(list,aux->data->node,aux2->data->node);
+            graph_remove_edge(list, removededge->node, aux->data->node);
             aux2 = aux->next;
-            eulerian_circle(list,path,removedRow->node);
+            eulerian_circle(list,path,removededge->node);
         }
         aux2 = aux2->next; // otherwise go to the next one
-        if (aux2 == NULL && aux->next != NULL) // just a basic check if the aux2 didn't get lost while roaming through the rows
+        if (aux2 == NULL && aux->next != NULL) // just a basic check if the aux2 didn't get lost while roaming through the edges
             aux2 = aux->next;
     }
     return;
 }
 
-int path_add_row_beginning(_list_header *list, _list_data *data)
+int path_add_edge_beginning(_list_header *list, _list_data *data)
 {
     _list_member *new=(_list_member*)malloc(sizeof(_list_member));
     _list_data *datanew=(_list_data*)malloc(sizeof(_list_data));
@@ -503,7 +503,7 @@ int path_add_row_beginning(_list_header *list, _list_data *data)
     return 0;
 }
 
-int path_add_row_end(_list_header *list, _list_data *data)
+int path_add_edge_end(_list_header *list, _list_data *data)
 {
     if(list_empty(list)==1){
         return list_add_begining(list,data);
@@ -544,10 +544,10 @@ void path_print(_list_header *path) // print the path, very similar to the graph
     return;
 }
 
-void list_purge(_list_header *path) // purges the list or the path...
+void list_purge(_list_header *list) // purges the list or the path...
 {
-    if (path != NULL && !list_empty(path)){
-        _list_member *aux2, *aux, *aux3 = path->first;
+    if (list != NULL && !list_empty(list)){
+        _list_member *aux2, *aux, *aux3 = list->first;
         while (aux3 != NULL){
             aux = aux3;
             aux2 = aux->next;
@@ -560,6 +560,7 @@ void list_purge(_list_header *path) // purges the list or the path...
             aux3 = NULL;
             aux3 = aux3->down;
         }
+        list->first = NULL;
     }
 }
 
@@ -571,7 +572,7 @@ int graph_is_a_tree(_list_header *graph)
     }
     _list_member *aux2, *aux = graph->first;
     _list_header *path = list_create();
-    path_create_path(graph, path, aux->data->node); // Check every possible row and its destination vertex
+    path_create_path(graph, path, aux->data->node); // Check every possible edge and its destination vertex
     aux = path->first;
     while(aux != NULL){ // These two loops compare every single combination of two connections of the graph
         aux2 = path->first;
@@ -585,27 +586,27 @@ int graph_is_a_tree(_list_header *graph)
     return 1;
 }
 
-void path_create_path (_list_header *graph, _list_header *path, int row) // Almost identical to the eulerian_circle algorithm, the only difference being that this function doesn't
-{                                                                        // check if the rows are bridges
+void path_create_path (_list_header *graph, _list_header *path, int edge) // Almost identical to the eulerian_circle algorithm, the only difference being that this function doesn't
+{                                                                        // check if the edges are bridges
     _list_member *aux2, *aux = graph->first;
-    _list_data *removedRow2, *removedRow;
-    while(aux != NULL && aux->data->node != row)
+    _list_data *removededge2, *removededge;
+    while(aux != NULL && aux->data->node != edge)
         aux = aux->down;
     if (aux == NULL){
-        puts("node not inserted on the list");
+        puts("node not inserted on the list\n");
         return;
     }
-    path_add_row_end(path,aux->data);
+    path_add_edge_end(path,aux->data);
     aux2 = aux->next;
     while (aux2 != NULL){
         /* if (aux->next->next == NULL){
-           removedRow = graph_remove_row(list,aux->data->node,aux2->data->node);
-           graph_remove_row(list, removedRow->node, aux->data->node);
+           removededge = graph_remove_edge(list,aux->data->node,aux2->data->node);
+           graph_remove_edge(list, removededge->node, aux->data->node);
            }*/
-        // else if (!graph_row_is_a_bridge(list,aux->data->node,aux2->data->node)){
-        removedRow = graph_remove_row(graph,aux->data->node,aux2->data->node);
-        removedRow2 =  graph_remove_row(graph, removedRow->node, aux->data->node);
-        path_create_path(graph,path,removedRow->node);
+        // else if (!graph_edge_is_a_bridge(list,aux->data->node,aux2->data->node)){
+        removededge = graph_remove_edge(graph,aux->data->node,aux2->data->node);
+        removededge2 =  graph_remove_edge(graph, removededge->node, aux->data->node);
+        path_create_path(graph,path,removededge->node);
         aux2 = aux->next;
         // }
         // aux2 = aux2->next;
@@ -652,7 +653,7 @@ _list_header *graph_tree_centers(_list_header *graph)
                 aux2=aux2->down;
             }
             if (treeCenter.visited == i-1){ // If it has the smallest eccentricity... (it has to be i-1 because the visited status starts with 1, and not 0)
-                path_add_row_end(treeCenters, &treeCenter); // add to the tree centers list
+                path_add_edge_end(treeCenters, &treeCenter); // add to the tree centers list
             }
             aux = aux->down;
             eccentricity = 0;
@@ -754,13 +755,13 @@ void tree_pre_order (_list_header *graph, _list_header *route, int node)
     }
     if (aux->data->visited != 1){
         aux->data->visited = 1;
-        path_add_row_end(route, aux->data);
+        path_add_edge_end(route, aux->data);
     } else {
         return;
     }
     aux2 = aux->next;
     while(aux2 != NULL){
-        // path_add_row_end(route, aux2->data);
+        // path_add_edge_end(route, aux2->data);
         tree_pre_order(graph, route, aux2->data->node);
         aux2 = aux2->next;
     }
@@ -778,21 +779,21 @@ void tree_in_order (_list_header *graph, _list_header *route, int node)
     if (aux->data->visited != 1){
         aux->data->visited = 1;
         if (aux->next->next == NULL || aux->next == NULL){
-            path_add_row_end(route, aux->data);
+            path_add_edge_end(route, aux->data);
             if (aux != graph->first)
                 return;
         }
     } else {
         return;
     }
-    int i, n = get_row_count(graph, aux->data->node);
+    int i, n = get_edge_count(graph, aux->data->node);
     aux2 = aux->next;
     if ((n % 2) == 0){
         for (i = 0; i < n/2; i++){
             tree_in_order(graph, route, aux2->data->node);
             aux2 = aux2->next;
         }
-        path_add_row_end(route, aux->data);
+        path_add_edge_end(route, aux->data);
         for (i = n/2; i < n; i++){
             tree_in_order(graph, route, aux2->data->node);
             aux2 = aux2->next;
@@ -803,7 +804,7 @@ void tree_in_order (_list_header *graph, _list_header *route, int node)
             aux2 = aux2->next;
         }
         tree_in_order(graph,route, aux2->data->node);
-        path_add_row_end(route, aux->data);
+        path_add_edge_end(route, aux->data);
         for (i = (n/2)+1; i < n; i++){
             tree_in_order(graph, route, aux2->data->node);
             aux2 = aux2->next;
@@ -823,7 +824,7 @@ void tree_post_order (_list_header *graph, _list_header *route, int node)
     if (aux->data->visited != 1){
         aux->data->visited = 1;
         if (aux->next->next == NULL){
-            path_add_row_end(route, aux->data);
+            path_add_edge_end(route, aux->data);
             return;
         }
     }
@@ -835,7 +836,7 @@ void tree_post_order (_list_header *graph, _list_header *route, int node)
         tree_post_order(graph, route, aux2->data->node);
         aux2 = aux2->next;
     }
-    path_add_row_end(route, aux->data);
+    path_add_edge_end(route, aux->data);
 }
 
 void graph_reset_visited_status(_list_header *graph)
@@ -859,7 +860,7 @@ int allMarked(int *selected, int n) // returns 1 if all the vertices have been m
     return flag;
 }
 
-_list_header *dijkstra (_list_header *graph, int node) // returns the spanning tree for the given graph, the variable 'node' is the initial node for the algorithm
+_list_header *graph_dijkstra (_list_header *graph, int node) // returns the spanning tree for the given graph, the variable 'node' is the initial node for the algorithm
 {
     _list_header *spanningTree = list_create();
     _list_member *aux2, *aux = graph->first;
@@ -881,7 +882,7 @@ _list_header *dijkstra (_list_header *graph, int node) // returns the spanning t
         pred[i] = -1;            // initializing the predecessors vector, all with -1
         selected[i] = 0;         // initializing the selected vector, which will be used to mark the vertex that already has the algorithm applied
         for (j = 0; j < n; j++){
-            weights[i][j] = -1;  // initializing the matrix which will contain all the weights of the rows of the graph
+            weights[i][j] = -1;  // initializing the matrix which will contain all the weights of the edges of the graph
         }
     }
     est[node] = 0;
@@ -924,9 +925,67 @@ _list_header *dijkstra (_list_header *graph, int node) // returns the spanning t
             if(pred[j] == i && j != node){
                 new.node = j;
                 new.weight = est[j] - est[i];
-                graph_add_row(spanningTree, &new, i);
+                graph_add_edge(spanningTree, &new, i);
             }
         }
     }
     return spanningTree;
+}
+
+int graph_bellmanFord (_list_header *graph, _list_header *spanningTree, int node)
+{
+    _list_member *aux2, *aux;
+    _list_data new;
+    int i, u, v, j, w, n = node_counter(graph);
+    double *dist =(double*)malloc(sizeof(double) * n);
+    int *pred =(int*)malloc(sizeof(int) * n);
+    for (i = 0; i < n; i++){
+        dist[i] = 1<<16;
+        pred[i] = -1;
+    }
+    dist[node] = 0;
+    for (i = 0; i < n-1; i++){
+        aux = graph->first;
+        while (aux != NULL){
+            u = aux->data->node;
+            aux2 = aux->next;
+            while(aux2 != NULL){
+                v = aux2->data->node;
+                w = aux2->data->weight;
+                if ((dist[u] + w) < dist[v]){
+                    dist[v] = dist[u] + w;
+                    pred[v] = u;
+                }
+                aux2 = aux2->next;
+            }
+            aux = aux->down;
+        }
+    }
+    aux = graph->first;
+    while (aux != NULL){
+        u = aux->data->node;
+        aux2 = aux->next;
+        while(aux2 != NULL){
+            v = aux2->data->node;
+            w = aux2->data->weight;
+            if ((dist[u] + w) < dist[v]){
+                puts("The graph has a negative-weight cycle\n");
+                return 0;
+            }
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    for (i = 0; i < n; i++){ // spanning tree creation
+        new.node = i;
+        list_add_end(spanningTree, &new);
+        for (j = 0; j < n; j++){
+            if(pred[j] == i && j != node){
+                new.node = j;
+                new.weight = dist[j] - dist[i];
+                graph_add_edge(spanningTree, &new, i);
+            }
+        }
+    }
+    return 1;
 }
