@@ -1034,12 +1034,10 @@ _list_header *graph_floydWarshall(_list_header *graph)
         if (!D_insert(header,n,i))
             exit(EXIT_FAILURE);
     }
-    
 }
 
 
-// http://www.tutorialspoint.com/cprogramming/c_operators.htm
-// http://www.tutorialspoint.com/ansi_c/c_control_statements.htm
+
 
 
 

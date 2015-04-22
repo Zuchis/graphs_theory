@@ -24,16 +24,9 @@ typedef struct{     // The header of the list
     _list_member *first;
 }_list_header;
 
-typedef struct  __D_member{
+typedef struct{
     int order;
     double **D;
-    __D_member *next;
-    __D_member *prev;
-}_D_member;
-
-typedef struct{
-    int size;
-    _D_member->first;
 }_D_header;
 
 _list_header *list_create();
