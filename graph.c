@@ -990,7 +990,8 @@ int graph_bellmanFord (_list_header *graph, _list_header *spanningTree, int node
     return 1;
 }
 
-_D_header *D_create(){
+_D_header *D_create()
+{
     _D_header *D=(_D_header*)malloc(sizeof(_D_header));
     if(D!=NULL){
         D->size=0;
@@ -1034,7 +1035,7 @@ _list_header *graph_floydWarshall(_list_header *graph)
         if (!D_insert(header,n,i))
             exit(EXIT_FAILURE);
     }
-    
+
 }
 
 
