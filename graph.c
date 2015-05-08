@@ -1034,35 +1034,17 @@ _list_header *graph_floydWarshall(_list_header *graph)
         if (!D_insert(header,n,i))
             exit(EXIT_FAILURE);
     }
-    
+    _D_member *currentMatrix = header->first;
+    _list_member *aux2, *aux2 = graph->first;
+    while (aux != NULL){
+        aux2 = aux->next;
+        while (aux2 != NULL){
+
+        }
+    }
+
 }
 
 
 // http://www.tutorialspoint.com/cprogramming/c_operators.htm
 // http://www.tutorialspoint.com/ansi_c/c_control_statements.htm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

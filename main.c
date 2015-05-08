@@ -6,9 +6,9 @@ int main (int argc, char *argv[])
     graph_print(graph);
     _list_header *spanningTree = list_create();
     if (graph_bellmanFord(graph, spanningTree, graph->first->data->node)){
-     puts("\n\n");
-     puts("Spanning Tree:\n");
-     graph_print(spanningTree);
+        puts("\n\n");
+        puts("Spanning Tree:\n");
+        graph_print(spanningTree);
     }
-	return 0;
+    return 0;
 }
