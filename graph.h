@@ -25,15 +25,15 @@ typedef struct{     // The header of the list
 }_list_header;
 
 typedef struct  __D_member{
+    struct __D_member *next;
+    struct __D_member *prev;
     int order;
     double **D;
-    __D_member *next;
-    __D_member *prev;
 }_D_member;
 
 typedef struct{
     int size;
-    _D_member->first;
+    _D_member *first;
 }_D_header;
 
 _list_header *list_create();
@@ -75,4 +75,7 @@ int allMarked(int *, int); // returns 1 if all the vertices have been marked, re
 _list_header *dijkstra (_list_header *, int); // returns the spanning tree for the given graph
 void print_double_matrix(double **, int , int );
 int graph_bellmanFord (_list_header *, _list_header *, int);
+_D_header *D_create();
+int D_insert(_D_header *, int, int);
+_list_header *graph_floydWarshall(_list_header *);
 #endif
