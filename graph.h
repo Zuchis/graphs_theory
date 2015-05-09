@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 enum {a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z};
 typedef struct{  // All the data used in the functions to manipulate a graph
     int node;
@@ -75,7 +76,9 @@ int allMarked(int *, int); // returns 1 if all the vertices have been marked, re
 _list_header *dijkstra (_list_header *, int); // returns the spanning tree for the given graph
 void print_double_matrix(double **, int , int );
 int graph_bellmanFord (_list_header *, _list_header *, int);
-_D_header *D_create();
-int D_insert(_D_header *, int, int);
+//_D_header *D_create();
+//int D_insert(_D_header *, int, int);
 _list_header *graph_floydWarshall(_list_header *);
+_list_header *graph_direct_transitive_closure(_list_header *, int);
+_list_header *graph_indirect_transitive_closure(_list_header *, int);
 #endif

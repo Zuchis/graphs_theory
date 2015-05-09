@@ -1,5 +1,8 @@
 #include "graph.h"
+#define MAX(x,y) (x > y ? x : y)
+#define MIN(x,y) (x < y ? x : y)
 
+const int maximum_number = INT_MAX;
 _list_header *list_create(){
     _list_header *list=(_list_header*)malloc(sizeof(_list_header));
     if(list!=NULL){
@@ -139,7 +142,7 @@ _list_header *graph_create()
                 if (str2 != NULL){
                     aux2.node = atoi(str2);
                 }
-                //printf("No %d\n",aux.node);
+               // printf("No %d\n",aux.node);
                 str2 = strtok(NULL, " "); // second strtok
                 //puts(str2);
                 //puts("\n");
@@ -990,7 +993,7 @@ int graph_bellmanFord (_list_header *graph, _list_header *spanningTree, int node
     return 1;
 }
 
-_D_header *D_create()
+/*_D_header *D_create()
 {
     _D_header *D=(_D_header*)malloc(sizeof(_D_header));
     if(D!=NULL){
@@ -1025,30 +1028,78 @@ int D_insert(_D_header *header, int numberOfVertices, int order)
     new->next = NULL;
     header->size++;
     return 1;
-}
+}*/
 
 _list_header *graph_floydWarshall(_list_header *graph)
 {
-    _D_header *header = D_create();
-    int i, n = node_counter(graph);
-    for (i = 0; i < n; i++){
-        if (!D_insert(header,n,i))
-            exit(EXIT_FAILURE);
+     int i,j,k, n = node_counter(graph);
+    _list_member *aux2, *aux = graph->first;
+    double **weights = (double**)malloc(n*sizeof(double*));
+    if (weights != NULL){
+        for (i = 0; i < n; i++){
+            weights[i] = (double*)malloc(n*sizeof(double));
+            if (weights[i] == NULL)
+                exit(EXIT_FAILURE);
+        }
+    } else {
+        exit(EXIT_FAILURE);
     }
-<<<<<<< HEAD
-    _D_member *currentMatrix = header->first;
-    _list_member *aux2, *aux2 = graph->first;
+    for (i = 0; i < n ; i++){
+        for (j = 0; j < n; j++){
+            weights[i][j] = maximum_number;
+        }
+        weights[i][i] = 0;
+    }
     while (aux != NULL){
         aux2 = aux->next;
         while (aux2 != NULL){
-
+            weights[aux->data->node][aux2->data->node] = aux2->data->weight;
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    for (k = 0; k < n; k++){
+        for (i = 0; i < n; i++){
+            for (j = 0; j < n; j++){
+                weights[i][j] = MIN(weights[i][j],weights[i][k]+weights[k][j]);
+            }
         }
     }
-=======
->>>>>>> 6b2b8244e888bf3016f2f1a55d58e63f525ceaf2
-
+    print_double_matrix(weights,n,n);
+    return NULL;
 }
 
+_list_header *graph_direct_transitive_closure(_list_header *graph, int node)
+{
+    _list_header *out = list_create();
+    _list_member *aux = graph->first;
+    dfs_header(graph, node);
+    while(aux != NULL){
+        if (aux->data->node != node){
+            if(aux->data->visited != 0){
+                path_add_edge_end(out, aux->data);
+            }
+        }
+        aux = aux->down;
+    }
+    return out;
+}
 
-// http://www.tutorialspoint.com/cprogramming/c_operators.htm
-// http://www.tutorialspoint.com/ansi_c/c_control_statements.htm
+_list_header *graph_indirect_transitive_closure(_list_header *graph, int node)
+{
+    _list_header *out = list_create();
+    _list_member *aux2, *aux = graph->first;
+    while(aux != NULL){
+        if (aux->data->node != node){
+            dfs_header(graph,aux->data->node);
+            aux2 = graph->first;
+            while(aux2 != NULL && aux2->data->node != node)
+                aux2 = aux2->down;
+            if (aux2->data->visited != 0){
+                path_add_edge_end(out, aux->data);
+            }
+        }
+        aux = aux->down;
+    }
+    return out;
+}
