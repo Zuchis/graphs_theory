@@ -117,49 +117,62 @@ int get_edge_count (_list_header *graph, int node)
     return i;
 }
 
+int graph_total_edge_count(_list_header *graph)
+{
+    _list_member *aux2, *aux = graph->first;
+    int i = 0;
+    while (aux != NULL){
+        aux2 = aux->next;
+        while(aux2 != NULL){
+            i++;
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    return i;
+}
+
 _list_header *graph_create()
 {
     FILE * entrada = fopen ("graph.txt", "r");
-    char *str;
-    char *str2;
     _list_header *list = list_create();
     _list_data aux, aux2;
-    int no_nodes = line_counter(entrada); // The no_nodes variable is used to get the number of lines of the file, and consequently, the number of Vertices
-    int m = no_nodes*4 + 1;                           // the m variable is used to allocate space for the array which will capture the lines of the file,
-    if ((str =(char*)malloc(m*sizeof(char))) == NULL) // Considering that the graph is a simple graph, and a vertex has a edge to all the other
-        exit(EXIT_FAILURE);                           // vertices, then the maximum line length is 4*no_nodes +1.
-    str[m] = '\0';                                    // In case the graph is not a simple graph, the multiplier factor must be increased.
     while (!feof(entrada)){ // This loop will catch line per line of the file
-        if (fgets(str,m-1,entrada) != "\n"){ // Check if the line is not a blank line
-            str2 = strtok(str,":"); // This separates the vertex from its edges
-            aux.node = atoi(str2);
+            fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
             aux.weight = 0;
-            list_add_end(list,&aux); // Add the caught vertex
-            while((str2 != NULL)){ // This loop catches all the edges of the current vertex, and their respectives weights
-                str2 = strtok(NULL, "-"); // All the edges are separated by their weights with a "-" symbol, so the first strtok will catch the edge,
-                //puts(str2);             // Whilst the second one will catch its weight
-                //puts("\n");
-                if (str2 != NULL){
-                    aux2.node = atoi(str2);
+            if (aux.node != -1)
+                list_add_end(list,&aux); // Add the caught vertex
+            do {
+                fscanf(entrada,"%d%lf",&aux2.node,&aux2.weight);
+                if (aux2.node != -1){
+                    graph_add_edge(list,&aux2,aux.node);
                 }
-               // printf("No %d\n",aux.node);
-                str2 = strtok(NULL, " "); // second strtok
-                //puts(str2);
-                //puts("\n");
-                if (str2 != NULL){
-                    aux2.weight = atoi(str2);
-                    graph_add_edge(list,&aux2,aux.node); // With the wanted data captured, adds the edge to the adjacency list of the current vertex.
-                }
-            }
-        }
+            } while (aux2.node != -1);
     }
-    free(str);
-    free(str2);
     rewind(entrada);
     return list;
 }
 
-
+_list_header *graph_create_with_time()
+{
+    FILE * entrada = fopen ("graph.txt", "r");
+    _list_header *list = list_create();
+    _list_data aux, aux2;
+    while (!feof(entrada)){ // This loop will catch line per line of the file
+            fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
+            aux.weight = 0;
+            if (aux.node != -1)
+                list_add_end(list,&aux); // Add the caught vertex
+            do {
+                fscanf(entrada,"%d%lf%lf",&aux2.node,&aux2.weight,&aux2.time);
+                if (aux2.node != -1){
+                    graph_add_edge(list,&aux2,aux.node);
+                }
+            } while (aux2.node != -1);
+    }
+    rewind(entrada);
+    return list;
+}
 
 int list_empty(_list_header *list){
     if(list->size==0)
@@ -187,6 +200,27 @@ void graph_print(_list_header *list){
             while(aux->next!=NULL){
                 aux=aux->next;
                 printf("%d (%2.2lf) --> ",aux->data->node,aux->data->weight);
+            }
+            puts("//\n");
+            aux2=aux2->down;
+            aux = aux2;
+        }
+        return;
+    }
+    puts("Null graph\n");
+    return;
+}
+
+void graph_print_with_time(_list_header *list)
+{
+    if(list->first != NULL){
+        _list_member *aux=list->first;
+        _list_member *aux2 = aux;
+        while (aux2!=NULL){
+            printf("%d --> ", aux->data->node);
+            while(aux->next!=NULL){
+                aux=aux->next;
+                printf("%d (%2.2lf,%2.2lf) --> ",aux->data->node,aux->data->weight,aux->data->time);
             }
             puts("//\n");
             aux2=aux2->down;
@@ -340,6 +374,58 @@ void dfs(_list_header *list, int n, int counter) // the 'counter' integer is use
         aux = aux->next;
     }
     return;
+}
+
+void graph_has_cycle_recursion(_list_header *graph, _list_data *previousNode,int currentNode, int *flag) // the 'counter' integer is used to set the visited status of the vertices
+{
+    if (!(*flag)){
+        _list_member *aux2, *aux = graph->first;
+        while (aux != NULL && aux->data->node != currentNode)
+            aux = aux->down;
+        if (aux == NULL){
+            puts("Element not contained in the graph");
+            return;
+        }
+        if (aux->data->visited == 0){
+            aux->data->visited = 1;
+            aux->data->predecessor = previousNode->node;
+        } else if (aux->data->visited == 1){
+            if (currentNode == previousNode->predecessor)
+                return;
+            else{
+                *flag = 1;
+                return;
+            }
+        } else
+            return;
+        aux2 = aux->next;
+        while (aux2 != NULL) {
+            // printf("%d --> %d path length: %d\n",aux2->data->node, aux->data->node, aux2->data->visited);
+            graph_has_cycle_recursion(graph,aux->data,aux2->data->node,flag);
+            aux2 = aux2->next;
+        }
+        aux->data->visited = 2;
+        return;
+    }
+    return;
+}
+//Check if the graph has a cycle, returns 1 if it has a cycle, returns 0 otherwise
+int graph_has_cycle(_list_header *graph)
+{
+    int flag = 0;
+    _list_member *aux = graph->first;
+    while (aux != NULL){
+        aux->data->visited = 0;
+        aux = aux->down;
+    }
+    aux = graph->first;
+    graph_has_cycle_recursion(graph,aux->data,aux->data->node,&flag);
+    while(aux != NULL){
+        if (aux->data->visited == 0)
+            graph_has_cycle_recursion(graph,aux->data,aux->data->node,&flag);
+        aux = aux->down;
+    }
+    return flag;
 }
 
 int graph_is_connected (_list_header *list)
@@ -532,6 +618,30 @@ int path_add_edge_end(_list_header *list, _list_data *data)
     return 0;
 }
 
+int path_add_edge_sorted(_list_header *list, _list_data *data)
+{
+    if(list_empty(list)==1 || data->weight<=list->first->data->weight){
+        return path_add_edge_beginning(list,data);
+    }else{
+        int i;
+        _list_member *aux=list->first;
+        while(aux->next!=NULL && aux->next->data->weight < data->weight){
+            aux=aux->next;
+        }
+        _list_data *datanew=(_list_data*)malloc(sizeof(_list_data));
+        _list_member *new=(_list_member*)malloc(sizeof(_list_member));
+        if(new!=NULL){
+            new->next=aux->next;
+            new->data=datanew;
+            memcpy(datanew,data,sizeof(_list_data));
+            aux->next=new;
+            new->prev=aux;
+            list->size++;
+            return list->size;
+        }
+    }
+}
+
 void path_print(_list_header *path) // print the path, very similar to the graph_print one
 {
     if (path != NULL){
@@ -545,6 +655,23 @@ void path_print(_list_header *path) // print the path, very similar to the graph
     }
     puts("Null path");
     return;
+}
+
+void print_edges(_list_header *edges)
+{
+    if (edges == NULL){
+        puts("It's null :(\n ");
+        return;
+    } else if (edges->first == NULL){
+        puts("It's null :(\n ");
+        return;
+    }
+    _list_member *aux = edges->first;
+    while (aux != NULL){
+        printf("%d -> %d (%lf)\n",aux->data->predecessor,aux->data->node,aux->data->weight);
+        aux = aux->next;
+    }
+    puts("\n");
 }
 
 void list_purge(_list_header *list) // purges the list or the path...
@@ -580,7 +707,7 @@ int graph_is_a_tree(_list_header *graph)
     while(aux != NULL){ // These two loops compare every single combination of two connections of the graph
         aux2 = path->first;
         while(aux2 != NULL){
-            if (aux != aux2 && aux2->data->node == aux->data->node) // If there's two connections which leads to the same vertex, and they're connected, then the graph is not a tree, for it has a cicle.
+            if (aux != aux2 && aux2->data->node == aux->data->node) // If there's two connections which leads to the same vertex, and they're connected, then the graph is not a tree, for it has a cycle.
                 return 0;
             aux2= aux2->next;
         }
@@ -993,46 +1120,9 @@ int graph_bellmanFord (_list_header *graph, _list_header *spanningTree, int node
     return 1;
 }
 
-/*_D_header *D_create()
-{
-    _D_header *D=(_D_header*)malloc(sizeof(_D_header));
-    if(D!=NULL){
-        D->size=0;
-        D->first=NULL;
-        return D;
-    }
-    return NULL;
-}
-
-int D_insert(_D_header *header, int numberOfVertices, int order)
-{
-    int i, n = numberOfVertices;
-    _D_member *new = (_D_member*)malloc(sizeof(_D_member));
-    if (new == NULL){return 0;}
-    new->order = order;
-    new->D = (double**)malloc(sizeof(double*)*n);
-    for (i = 0; i < n; i++)
-        new->D[i] = (double*)malloc(sizeof(double)*n);
-    _D_member *aux = header->first;
-    while(aux != NULL)
-        aux = aux->next;
-    if (aux == header->first){
-        new->prev = NULL;
-        new->next = NULL;
-        header->first = new;
-        header->size++;
-        return 1;
-    }
-    aux->next = new;
-    aux->next->prev = aux;
-    new->next = NULL;
-    header->size++;
-    return 1;
-}*/
-
 _list_header *graph_floydWarshall(_list_header *graph)
 {
-     int i,j,k, n = node_counter(graph);
+    int i,j,k, n = node_counter(graph);
     _list_member *aux2, *aux = graph->first;
     double **weights = (double**)malloc(n*sizeof(double*));
     if (weights != NULL){
@@ -1069,6 +1159,86 @@ _list_header *graph_floydWarshall(_list_header *graph)
     return NULL;
 }
 
+_list_header *graph_floydWarshall_with_path_reconstrution(_list_header *graph, int u, int v, int option)
+{
+    _list_header *path = list_create();
+    int i,j,k, n = node_counter(graph), before, after, ul = u, vl = v ;
+    _list_member *aux2, *aux = graph->first;
+    _list_data e;
+    double **weights = (double**)malloc(n*sizeof(double*));
+    int **next = (int**)malloc(n*sizeof(int*));
+    if (weights != NULL && next != NULL){
+        for (i = 0; i < n; i++){
+            weights[i] = (double*)malloc(n*sizeof(double));
+            next[i] = (int*)malloc(n*sizeof(int));
+            if (weights[i] == NULL || next[i] == NULL)
+                exit(EXIT_FAILURE);
+        }
+    } else {
+        exit(EXIT_FAILURE);
+    }
+    for (i = 0; i < n ; i++){
+        for (j = 0; j < n; j++){
+            weights[i][j] = maximum_number;
+            next[i][j] = -1;
+        }
+        weights[i][i] = 0;
+    }
+    while (aux != NULL){
+        aux2 = aux->next;
+        while (aux2 != NULL){
+            if (option == COST)
+                weights[aux->data->node][aux2->data->node] = aux2->data->weight;
+            else
+                weights[aux->data->node][aux2->data->node] = aux2->data->time;
+            next[aux->data->node][aux2->data->node] = aux2->data->node;
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    for (k = 0; k < n; k++){
+        for (i = 0; i < n; i++){
+            for (j = 0; j < n; j++){
+                before = weights[i][j];
+                weights[i][j] = MIN(weights[i][j],weights[i][k]+weights[k][j]);
+                after = weights[i][j];
+                if (after != before)
+                    next[i][j] = next[i][k];
+            }
+        }
+    }
+    switch (option)
+    {
+        case TIME:
+            printf("Smallest route considering time from %d to %d: %lf\n\n",u,v,weights[u][v]);
+            break;
+
+        case COST:
+            printf("Smallest route considering cost from %d to %d: %lf\n\n",u,v,weights[u][v]);
+            break;
+
+        default:
+            printf("Chose a valid option scrub\n\n");
+            break;
+    }
+
+    printf("The route from %d to %d is: \n",u,v);
+    if (next[u][v] == -1){
+        puts("The graph is not connected ??\n\n");
+        return NULL;
+    }
+
+    e.node = u;
+    path_add_edge_end(path,&e);
+    while(ul != vl){
+        ul = next[ul][vl];
+        e.node = ul;
+        path_add_edge_end(path,&e);
+    }
+    path_print(path);
+    return path;
+}
+
 _list_header *graph_direct_transitive_closure(_list_header *graph, int node)
 {
     _list_header *out = list_create();
@@ -1100,6 +1270,100 @@ _list_header *graph_indirect_transitive_closure(_list_header *graph, int node)
             }
         }
         aux = aux->down;
+    }
+    return out;
+}
+
+_list_header *graph_PRIM(_list_header *graph)
+{
+    _list_member *aux2, *aux = graph->first;
+    _list_header *tree = list_create();
+    int j, i, src, u, n = node_counter(graph);
+    int *marked =(int*)malloc(n*sizeof(int));
+    double **weights =(double**)malloc(n*sizeof(double*));
+    if(weights != NULL){
+        for(i = 0; i < n; i++){
+            if ((weights[i] = (double*)malloc(n*sizeof(double)))== NULL)
+                exit(EXIT_FAILURE);
+        }
+    } else
+        exit(EXIT_FAILURE);
+    _list_data minimumEdge;
+    minimumEdge.weight = maximum_number;
+    for(i = 0; i < n; i++){
+        marked[i] = 0;
+        for(j = 0; j < n; j++)
+            weights[i][j] = maximum_number;
+    }
+    while (aux != NULL){
+        list_add_end(tree,aux->data);
+        aux2 = aux->next;
+        while (aux2 != NULL){
+            weights[aux->data->node][aux2->data->node] = aux2->data->weight;
+            if (aux2->data->weight < minimumEdge.weight){
+                minimumEdge.weight = aux2->data->weight;
+                minimumEdge.node = aux2->data->node;
+                src = aux->data->node;
+            }
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    weights[src][minimumEdge.node] = maximum_number;
+    graph_add_edge(tree,&minimumEdge,src);
+    marked[src] = 1;
+    marked[minimumEdge.node] = 1;
+    for(u = 1; u < n-1;u++){
+        minimumEdge.weight = maximum_number;
+        for(i = 0; i < n; i++){
+            if(marked[i]){
+                for(j = 0; j < n; j++){
+                    if((weights[i][j] < minimumEdge.weight) && (!marked[j])){
+                        minimumEdge.weight = weights[i][j];
+                        minimumEdge.node = j;
+                        src = i;
+                    }
+                }
+            }
+        }
+        graph_add_edge(tree,&minimumEdge,src);
+        weights[src][minimumEdge.node] = maximum_number;
+        if(graph_has_cycle(tree)){
+            graph_remove_edge(tree,src,minimumEdge.node);
+            u--;
+        } else
+            marked[minimumEdge.node] = 1;
+    }
+    return tree;
+}
+
+_list_header *graph_kruskal(_list_header *graph)
+{
+    _list_member *aux2, *aux = graph->first;
+    int i, n = node_counter(graph),u;
+    _list_header *out = list_create(), *edges = list_create();
+    while (aux !=  NULL){
+        list_add_end(out,aux->data);
+        aux2 = aux->next;
+        while(aux2 != NULL){
+            aux2->data->predecessor = aux->data->node;
+            path_add_edge_sorted(edges,aux2->data);
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    aux = edges->first;
+    for (u = 0; u < n-1; u++){
+        if (aux == NULL){
+            puts("Reached the end of the edges... Error encountered\n");
+            return NULL;
+        }
+        graph_add_edge(out,aux->data,aux->data->predecessor);
+        if(graph_has_cycle(out)){
+            graph_remove_edge(out,aux->data->predecessor,aux->data->node);
+            u--;
+        }
+        aux = aux->next;
     }
     return out;
 }
