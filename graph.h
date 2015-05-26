@@ -10,6 +10,7 @@ typedef struct{  // All the data used in the functions to manipulate a graph
     int node;
     double weight;
     double time;
+    double flow,capacity;
     int visited;
     int predecessor;
 }_list_data;
@@ -39,6 +40,7 @@ int line_counter(FILE*); // returns the number of lines of the entered file, whi
 void print_vector(int*,int); // print a vector at the given number
 _list_header *graph_create(void);
 _list_header *graph_create_with_time(void);
+_list_header *graph_create_with_capacity(void);
 int **create_adjacency_matrix(void);
 void dfs_header(_list_header*,int); // Wrapper of the "Depth First Search" function, it initializes the visited status of all the vertex with 0 and then start the dfs at the given vertex
 void dfs(_list_header*, int, int); // Check the connectivity of the graph, starting at the given vertex

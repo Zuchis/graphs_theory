@@ -149,7 +149,7 @@ _list_header *graph_create()
                 }
             } while (aux2.node != -1);
     }
-    rewind(entrada);
+    fclose(entrada);
     return list;
 }
 
@@ -170,10 +170,30 @@ _list_header *graph_create_with_time()
                 }
             } while (aux2.node != -1);
     }
-    rewind(entrada);
+    fclose(entrada);
     return list;
 }
 
+_list_header *graph_create_with_capacity()
+{
+    FILE * entrada = fopen ("graph.txt", "r");
+    _list_header *list = list_create();
+    _list_data aux, aux2;
+    while (!feof(entrada)){ // This loop will catch line per line of the file
+            fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
+            aux.weight = 0;
+            if (aux.node != -1)
+                list_add_end(list,&aux); // Add the caught vertex
+            do {
+                fscanf(entrada,"%d%lf%lf",&aux2.node,&aux2.weight,&aux2.capacity);
+                if (aux2.node != -1){
+                    graph_add_edge(list,&aux2,aux.node);
+                }
+            } while (aux2.node != -1);
+    }
+    fclose(entrada);
+    return list;
+}
 int list_empty(_list_header *list){
     if(list->size==0)
         return 1;
@@ -1366,4 +1386,20 @@ _list_header *graph_kruskal(_list_header *graph)
         aux = aux->next;
     }
     return out;
+}
+
+double graph_ford_fulkerson(_list_header *graph)
+{
+    int n = node_counter(graph), i, j;
+    _list_member *aux2, *aux = graph->first;
+    while(aux != NULL){
+        aux->data->flow = 0.0;
+        aux = aux->down;
+    }
+    
+
+
+
+
+
 }
