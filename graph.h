@@ -51,6 +51,7 @@ int graph_edge_is_a_bridge(_list_header *, int, int); // Returns 1 if the edge i
 int path_add_edge_sorted(_list_header *, _list_data *);
 int path_add_edge_end(_list_header *, _list_data *); // Add a edge to a path
 int path_add_edge_beginning(_list_header *, _list_data *); // Add a edge in the beggining of a path
+_list_data *path_remove_beginning(_list_header *);
 void path_print(_list_header *); // Print the path
 void print_edges(_list_header *);
 _list_header *graph_has_eulerian_circle(_list_header *); // Wrapper of the Eulerian Circle Function, check if the graph has an eulerian circle using fleury's algorithm, returns the path regardless of the result
@@ -82,4 +83,8 @@ void graph_has_cycle_recursion(_list_header *, _list_data *,int, int *); // the 
 int graph_has_cycle(_list_header *);
 _list_header *graph_PRIM(_list_header *);
 _list_header *graph_kruskal(_list_header *);
+int exist_edge(_list_header *, int, int);
+void set_visited_zero(_list_header *);
+double bfs_with_augmented_path(_list_header *, _list_header *, int , int );
+void bfs_with_augmented_path_recursion(_list_header *, _list_header *, int , int , int, int *);
 #endif

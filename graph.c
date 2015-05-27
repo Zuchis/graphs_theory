@@ -187,6 +187,7 @@ _list_header *graph_create_with_capacity()
             do {
                 fscanf(entrada,"%d%lf%lf",&aux2.node,&aux2.weight,&aux2.capacity);
                 if (aux2.node != -1){
+                    aux2.flow = 0.0;
                     graph_add_edge(list,&aux2,aux.node);
                 }
             } while (aux2.node != -1);
@@ -267,7 +268,7 @@ int line_counter (FILE * fp)
 
         sample_chr = getc(fp);
     }
-    rewind(fp);
+    fclose(fp);
     return no_lines; // return the number of lines
 }
 
@@ -612,6 +613,22 @@ int path_add_edge_beginning(_list_header *list, _list_data *data)
     return 0;
 }
 
+_list_data *path_remove_beginning(_list_header *path)
+{
+    if(path->first == NULL)
+        return NULL;
+    _list_member *aux2, *aux = path->first;
+    _list_data *out;
+    aux2 = aux->next;
+    aux2->prev = aux->prev;
+    aux->next = NULL;
+    path->first = aux2;
+    memcpy(out,aux->data,sizeof(_list_data));
+    free(aux);
+    return out;
+
+}
+
 int path_add_edge_end(_list_header *list, _list_data *data)
 {
     if(list_empty(list)==1){
@@ -701,14 +718,13 @@ void list_purge(_list_header *list) // purges the list or the path...
         while (aux3 != NULL){
             aux = aux3;
             aux2 = aux->next;
+            aux3 = aux3->down;
             while(aux != NULL){
                 free(aux);
                 aux = aux2;
                 if(aux2 != NULL)
                     aux2 = aux2->next;
             }
-            aux3 = NULL;
-            aux3 = aux3->down;
         }
         list->first = NULL;
     }
@@ -1388,18 +1404,99 @@ _list_header *graph_kruskal(_list_header *graph)
     return out;
 }
 
+int exist_edge(_list_header *graph, int src, int dest)
+{
+    _list_member *aux2, *aux = graph->first;
+    while(aux != NULL && aux->data->node != src)
+        aux = aux->down;
+    if(aux == NULL){
+        puts("Error, node not found.\n");
+        return 0;
+    }
+    aux2 = aux->next;
+    while(aux2 != NULL){
+        if(aux2->data->node == dest)
+            return 1;
+        aux2 = aux2->next;
+    }
+    return 0;
+}
+
+void set_visited_zero(_list_header *graph)
+{
+    _list_member *aux = graph->first;
+    while (aux != NULL){
+        aux->data->visited = 0;
+        aux = aux->down;
+    }
+}
+
+double bfs_with_augmented_path(_list_header *graph, _list_header *path, int s, int t)
+{
+    set_visited_zero(graph);
+    double minFlow = (double)maximum_number;
+    _list_header *queue = list_create();
+    _list_member *aux2,*aux = graph->first;
+    int flag = 0;
+    bfs_with_augmented_path_recursion(graph,path,t,s,s,&flag);
+}
+
+void bfs_with_augmented_path_recursion(_list_header *graph, _list_header *path, int t, int current, int pred, int *flag)
+{
+    if (!(*flag)){
+        _list_member *aux2, *aux = graph->first;
+        _list_data *removed;
+        while (aux->data->node != current)
+            aux = aux->down;
+        if (aux->data->visited != 1){
+            aux->data->visited = 1;
+            aux->data->predecessor = pred;
+            if(aux->data->node == t){
+                *flag = 1;
+                return;
+            }
+            aux2 = aux->next;
+            while(aux2 != NULL){
+                if(aux2->data->capacity > 0)
+                    path_add_edge_end(path,aux2->data);
+                if(aux2->data->node == t)
+                    bfs_with_augmented_path_recursion(graph,path,t,aux2->data->node,aux->data->node,flag);
+                aux2 = aux2->next;
+            }
+        } else {
+            return;
+        }
+        removed = path_remove_beginning(path);
+        if(removed == NULL){
+            *flag = 1;
+            return;
+        }
+
+    }
+}
+
 double graph_ford_fulkerson(_list_header *graph)
 {
     int n = node_counter(graph), i, j;
+    double maxFlow = 0.0;
     _list_member *aux2, *aux = graph->first;
-    while(aux != NULL){
-        aux->data->flow = 0.0;
+    _list_data newEdge;
+    _list_header *gf = list_create(); // residual net
+    _list_header *path = list_create();
+    while (aux != NULL){
+        list_add_end(gf,aux->data);
+        aux2 = aux->next;
+        while(aux2 != NULL){
+            aux2->data->predecessor = aux->data->node;
+            graph_add_edge(gf,aux2->data,aux->data->node);
+            if(!exist_edge(graph,aux2->data->node,aux->data->node)){
+                newEdge.node = aux->data->node;
+                newEdge.capacity = 0;
+                newEdge.weight = aux2->data->weight;
+                graph_add_edge(gf,&newEdge,aux2->data->node);
+            }
+            aux2 = aux2->next;
+        }
         aux = aux->down;
     }
-    
-
-
-
-
-
 }
