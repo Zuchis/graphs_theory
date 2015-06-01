@@ -35,6 +35,7 @@ void list_add_end(_list_header*,_list_data*); // Add an item on the end of the l
 int list_size(_list_header*);   // Return the size of the list
 void graph_print(_list_header*); // Print the items in the graph
 void graph_print_with_time(_list_header *);
+void graph_print_with_capacity(_list_header *);
 int graph_add_edge(_list_header*, _list_data*, int); // Add an edge to the vertex labeled by the integer value
 int line_counter(FILE*); // returns the number of lines of the entered file, which contains the graph
 void print_vector(int*,int); // print a vector at the given number
@@ -85,6 +86,10 @@ _list_header *graph_PRIM(_list_header *);
 _list_header *graph_kruskal(_list_header *);
 int exist_edge(_list_header *, int, int);
 void set_visited_zero(_list_header *);
-double bfs_with_augmented_path(_list_header *, _list_header *, int , int );
+_list_data *get_edge(_list_header *, int, int);
+_list_member *get_vertex(_list_header *, int );
+double bfs_with_augmented_path(_list_header *,int , int );
 void bfs_with_augmented_path_recursion(_list_header *, _list_header *, int , int , int, int *);
+void update_edge_capacity(_list_header *, int, int, double);
+double graph_ford_fulkerson(_list_header *, int, int);
 #endif

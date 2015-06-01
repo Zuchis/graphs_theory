@@ -138,16 +138,16 @@ _list_header *graph_create()
     _list_header *list = list_create();
     _list_data aux, aux2;
     while (!feof(entrada)){ // This loop will catch line per line of the file
-            fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
-            aux.weight = 0;
-            if (aux.node != -1)
-                list_add_end(list,&aux); // Add the caught vertex
-            do {
-                fscanf(entrada,"%d%lf",&aux2.node,&aux2.weight);
-                if (aux2.node != -1){
-                    graph_add_edge(list,&aux2,aux.node);
-                }
-            } while (aux2.node != -1);
+        fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
+        aux.weight = 0;
+        if (aux.node != -1)
+            list_add_end(list,&aux); // Add the caught vertex
+        do {
+            fscanf(entrada,"%d%lf",&aux2.node,&aux2.weight);
+            if (aux2.node != -1){
+                graph_add_edge(list,&aux2,aux.node);
+            }
+        } while (aux2.node != -1);
     }
     fclose(entrada);
     return list;
@@ -159,16 +159,16 @@ _list_header *graph_create_with_time()
     _list_header *list = list_create();
     _list_data aux, aux2;
     while (!feof(entrada)){ // This loop will catch line per line of the file
-            fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
-            aux.weight = 0;
-            if (aux.node != -1)
-                list_add_end(list,&aux); // Add the caught vertex
-            do {
-                fscanf(entrada,"%d%lf%lf",&aux2.node,&aux2.weight,&aux2.time);
-                if (aux2.node != -1){
-                    graph_add_edge(list,&aux2,aux.node);
-                }
-            } while (aux2.node != -1);
+        fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
+        aux.weight = 0;
+        if (aux.node != -1)
+            list_add_end(list,&aux); // Add the caught vertex
+        do {
+            fscanf(entrada,"%d%lf%lf",&aux2.node,&aux2.weight,&aux2.time);
+            if (aux2.node != -1){
+                graph_add_edge(list,&aux2,aux.node);
+            }
+        } while (aux2.node != -1);
     }
     fclose(entrada);
     return list;
@@ -180,17 +180,17 @@ _list_header *graph_create_with_capacity()
     _list_header *list = list_create();
     _list_data aux, aux2;
     while (!feof(entrada)){ // This loop will catch line per line of the file
-            fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
-            aux.weight = 0;
-            if (aux.node != -1)
-                list_add_end(list,&aux); // Add the caught vertex
-            do {
-                fscanf(entrada,"%d%lf%lf",&aux2.node,&aux2.weight,&aux2.capacity);
-                if (aux2.node != -1){
-                    aux2.flow = 0.0;
-                    graph_add_edge(list,&aux2,aux.node);
-                }
-            } while (aux2.node != -1);
+        fscanf(entrada,"%d",&aux.node); // This separates the vertex from its edges
+        aux.weight = 0;
+        if (aux.node != -1)
+            list_add_end(list,&aux); // Add the caught vertex
+        do {
+            fscanf(entrada,"%d%lf%lf",&aux2.node,&aux2.weight,&aux2.capacity);
+            if (aux2.node != -1){
+                aux2.flow = 0.0;
+                graph_add_edge(list,&aux2,aux.node);
+            }
+        } while (aux2.node != -1);
     }
     fclose(entrada);
     return list;
@@ -242,6 +242,27 @@ void graph_print_with_time(_list_header *list)
             while(aux->next!=NULL){
                 aux=aux->next;
                 printf("%d (%2.2lf,%2.2lf) --> ",aux->data->node,aux->data->weight,aux->data->time);
+            }
+            puts("//\n");
+            aux2=aux2->down;
+            aux = aux2;
+        }
+        return;
+    }
+    puts("Null graph\n");
+    return;
+}
+
+void graph_print_with_capacity(_list_header *list)
+{
+    if(list->first != NULL){
+        _list_member *aux=list->first;
+        _list_member *aux2 = aux;
+        while (aux2!=NULL){
+            printf("%d --> ", aux->data->node);
+            while(aux->next!=NULL){
+                aux=aux->next;
+                printf("%d (%2.2lf,%2.2lf) --> ",aux->data->node,aux->data->weight,aux->data->capacity);
             }
             puts("//\n");
             aux2=aux2->down;
@@ -601,6 +622,8 @@ int path_add_edge_beginning(_list_header *list, _list_data *data)
     _list_data *datanew=(_list_data*)malloc(sizeof(_list_data));
     if(new!=NULL && datanew!=NULL){
         memcpy(datanew,data,sizeof(_list_data));
+        new->down = NULL;
+        new->up = NULL;
         new->data=datanew;
         new->next=list->first;
         new->prev=NULL;
@@ -613,20 +636,20 @@ int path_add_edge_beginning(_list_header *list, _list_data *data)
     return 0;
 }
 
-_list_data *path_remove_beginning(_list_header *path)
+_list_data *path_remove_beginning(_list_header *list)
 {
-    if(path->first == NULL)
+    if(list_empty(list)==1){
         return NULL;
-    _list_member *aux2, *aux = path->first;
-    _list_data *out;
-    aux2 = aux->next;
-    aux2->prev = aux->prev;
-    aux->next = NULL;
-    path->first = aux2;
-    memcpy(out,aux->data,sizeof(_list_data));
-    free(aux);
-    return out;
-
+    }else{
+        _list_member *t=list->first;
+        _list_data *data=t->data;
+        list->first=t->next;
+        if(t->next!=NULL)
+            t->next->prev=NULL;
+        list->size--;
+        free(t);
+        return data;
+    }
 }
 
 int path_add_edge_end(_list_header *list, _list_data *data)
@@ -1431,17 +1454,54 @@ void set_visited_zero(_list_header *graph)
     }
 }
 
-double bfs_with_augmented_path(_list_header *graph, _list_header *path, int s, int t)
+_list_data *get_edge(_list_header *graph, int src, int dest)
+{
+    _list_member *aux2, *aux = graph->first;
+    _list_data *edge;
+    while(aux->data->node != src)
+        aux = aux->down;
+    aux2 = aux->next;
+    while(aux2 != NULL && aux2->data->node != dest)
+        aux2 = aux2->next;
+    memcpy(edge,aux->data,sizeof(_list_data));
+    return edge;
+}
+
+_list_member *get_vertex(_list_header *graph, int v)
+{
+    _list_member *aux = graph->first;
+    while(aux != NULL && aux->data->node != v)
+        aux = aux->down;
+    if (aux == NULL)
+        exit(EXIT_FAILURE);
+    return aux;
+}
+
+double bfs_with_augmented_path(_list_header *graph, int s, int t)
 {
     set_visited_zero(graph);
     double minFlow = (double)maximum_number;
     _list_header *queue = list_create();
-    _list_member *aux2,*aux = graph->first;
+    _list_member *aux2,*aux;
+    _list_data *edge;
     int flag = 0;
-    bfs_with_augmented_path_recursion(graph,path,t,s,s,&flag);
+    bfs_with_augmented_path_recursion(graph,queue,t,s,s,&flag);
+    aux = get_vertex(graph,t);
+    if(aux->data->visited == 0)
+        return -1;
+    while(aux->data->node != s){
+        //path_add_edge_end(path,aux->data);
+        edge = get_edge(graph,aux->data->predecessor,aux->data->node);
+        minFlow = MIN(minFlow,edge->capacity);
+        aux = get_vertex(graph,aux->data->predecessor);
+    }
+    //path_add_edge_end(path,aux->data);
+    list_purge(queue);
+    free(queue);
+    return minFlow;
 }
 
-void bfs_with_augmented_path_recursion(_list_header *graph, _list_header *path, int t, int current, int pred, int *flag)
+void bfs_with_augmented_path_recursion(_list_header *graph, _list_header *queue, int t, int current, int pred, int *flag)
 {
     if (!(*flag)){
         _list_member *aux2, *aux = graph->first;
@@ -1457,32 +1517,52 @@ void bfs_with_augmented_path_recursion(_list_header *graph, _list_header *path, 
             }
             aux2 = aux->next;
             while(aux2 != NULL){
-                if(aux2->data->capacity > 0)
-                    path_add_edge_end(path,aux2->data);
-                if(aux2->data->node == t)
-                    bfs_with_augmented_path_recursion(graph,path,t,aux2->data->node,aux->data->node,flag);
+                if(aux2->data->capacity > 0){
+                    path_add_edge_end(queue,aux2->data);
+                    if(aux2->data->node == t)
+                        bfs_with_augmented_path_recursion(graph,queue,t,aux2->data->node,aux->data->node,flag);
+                }
                 aux2 = aux2->next;
             }
         } else {
             return;
         }
-        removed = path_remove_beginning(path);
+        removed = path_remove_beginning(queue);
         if(removed == NULL){
             *flag = 1;
             return;
         }
-
+        if(!(*flag))
+            bfs_with_augmented_path_recursion(graph,queue,t,removed->node,aux->data->node,flag);
     }
 }
 
-double graph_ford_fulkerson(_list_header *graph)
+void update_edge_capacity(_list_header *graph, int src, int dest, double flow)
+{
+    _list_member *aux2, *aux = graph->first;
+    while(aux != NULL && aux->data->node != src)
+        aux = aux->down;
+    if(aux == NULL){
+        puts("node not found\n");
+        return;
+    }
+    aux2 = aux->next;
+    while(aux2 != NULL && aux2->data->node != dest)
+        aux2 = aux2->next;
+    if(aux2 == NULL){
+        puts("edfe not found\n");
+        return;
+    }
+    aux2->data->capacity -= flow;
+}
+
+double graph_ford_fulkerson(_list_header *graph, int s, int t)
 {
     int n = node_counter(graph), i, j;
-    double maxFlow = 0.0;
+    double minFlow, maxFlow = 0.0;
     _list_member *aux2, *aux = graph->first;
     _list_data newEdge;
     _list_header *gf = list_create(); // residual net
-    _list_header *path = list_create();
     while (aux != NULL){
         list_add_end(gf,aux->data);
         aux2 = aux->next;
@@ -1499,4 +1579,16 @@ double graph_ford_fulkerson(_list_header *graph)
         }
         aux = aux->down;
     }
+    minFlow = bfs_with_augmented_path(gf,s,t);
+    while (minFlow != -1){
+        aux = get_vertex(gf,t);
+        while (aux->data->node != s){
+            update_edge_capacity(gf,aux->data->predecessor,aux->data->node,minFlow);
+            update_edge_capacity(gf,aux->data->node,aux->data->predecessor,-minFlow);
+            aux = get_vertex(gf,aux->data->predecessor);
+        }
+        maxFlow += minFlow;
+        minFlow = bfs_with_augmented_path(gf,s,t);
+    }
+    return maxFlow;
 }
