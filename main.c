@@ -7,8 +7,8 @@ int main (int argc, char *argv[])
     puts("Original graph:\n");
     graph_print_with_capacity(graph);
     puts("\n");
-    double flow = bfs_with_augmented_path(graph,0,3);
-    //double flow = graph_ford_fulkerson(graph,0,3);
+    _list_member *aux2, *aux = graph->first;
+    double flow = graph_ford_fulkerson(graph,0,3);
     printf("Max flow = %lf\n",flow);
     return 0;
 }

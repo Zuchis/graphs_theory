@@ -1457,14 +1457,16 @@ void set_visited_zero(_list_header *graph)
 _list_data *get_edge(_list_header *graph, int src, int dest)
 {
     _list_member *aux2, *aux = graph->first;
-    _list_data *edge;
     while(aux->data->node != src)
         aux = aux->down;
     aux2 = aux->next;
     while(aux2 != NULL && aux2->data->node != dest)
         aux2 = aux2->next;
-    memcpy(edge,aux->data,sizeof(_list_data));
-    return edge;
+    if(aux2 == NULL){
+        printf("Edge from %d to %d not found...\n",src,dest);
+        return NULL;
+    }
+    return aux2->data;
 }
 
 _list_member *get_vertex(_list_header *graph, int v)
@@ -1472,8 +1474,10 @@ _list_member *get_vertex(_list_header *graph, int v)
     _list_member *aux = graph->first;
     while(aux != NULL && aux->data->node != v)
         aux = aux->down;
-    if (aux == NULL)
-        exit(EXIT_FAILURE);
+    if (aux == NULL){
+        printf("Node %d not found...\n",v);
+        return NULL;
+    }
     return aux;
 }
 
@@ -1494,6 +1498,7 @@ double bfs_with_augmented_path(_list_header *graph, int s, int t)
         aux2 = aux2->next;
     }
     edge = path_remove_beginning(queue);
+    //printf("Edge removed, src: %d, dest: %d\n",edge->predecessor,edge->node);
     while(edge != NULL){
         aux = get_vertex(graph,edge->node);
         if(aux->data->visited != 1){
@@ -1504,51 +1509,64 @@ double bfs_with_augmented_path(_list_header *graph, int s, int t)
             aux2= aux->next;
             while(aux2 != NULL){
                 if (aux2->data->capacity > 0)
-                    path_add_edge_end(queue,aux->data);
+                    path_add_edge_end(queue,aux2->data);
                 aux2 = aux2->next;
             }
         }
         edge = path_remove_beginning(queue);
+       // if (edge != NULL)
+           // printf("Edge removed, src: %d, dest: %d\n",edge->predecessor,edge->node);
     }
+    aux = get_vertex(graph,t);
+    if(aux->data->visited == 0)
+        return -1;
+    while(aux->data->node != s){
+        //printf("Current: %d , Predecessor: %d\n",aux->data->node,aux->data->predecessor);
+        edge = get_edge(graph,aux->data->predecessor,aux->data->node);
+        if(edge != NULL)
+            minFlow = MIN(minFlow,edge->capacity);
+        aux = get_vertex(graph,aux->data->predecessor);
+    }
+    edge = NULL;
     free(queue);
     return minFlow;
 }
 
-void bfs_with_augmented_path_recursion(_list_header *graph, _list_header *queue, int t, int current, int pred, int *flag)
-{
-    if (!(*flag)){
-        _list_member *aux2, *aux = graph->first;
-        _list_data *removed;
-        while (aux->data->node != current)
-            aux = aux->down;
-        if (aux->data->visited != 1){
-            aux->data->visited = 1;
-            aux->data->predecessor = pred;
-            if(aux->data->node == t){
-                *flag = 1;
-                return;
-            }
-            aux2 = aux->next;
-            while(aux2 != NULL){
-                if(aux2->data->capacity > 0){
-                    path_add_edge_end(queue,aux2->data);
-                    if(aux2->data->node == t)
-                        bfs_with_augmented_path_recursion(graph,queue,t,aux2->data->node,aux->data->node,flag);
-                }
-                aux2 = aux2->next;
-            }
-        } else {
-            return;
-        }
-        removed = path_remove_beginning(queue);
-        if(removed == NULL){
-            *flag = 1;
-            return;
-        }
-        if(!(*flag))
-            bfs_with_augmented_path_recursion(graph,queue,t,removed->node,aux->data->node,flag);
-    }
-}
+/*void bfs_with_augmented_path_recursion(_list_header *graph, _list_header *queue, int t, int current, int pred, int *flag)
+  {
+  if (!(*flag)){
+  _list_member *aux2, *aux = graph->first;
+  _list_data *removed;
+  while (aux->data->node != current)
+  aux = aux->down;
+  if (aux->data->visited != 1){
+  aux->data->visited = 1;
+  aux->data->predecessor = pred;
+  if(aux->data->node == t){
+ *flag = 1;
+ return;
+ }
+ aux2 = aux->next;
+ while(aux2 != NULL){
+ if(aux2->data->capacity > 0){
+ path_add_edge_end(queue,aux2->data);
+ if(aux2->data->node == t)
+ bfs_with_augmented_path_recursion(graph,queue,t,aux2->data->node,aux->data->node,flag);
+ }
+ aux2 = aux2->next;
+ }
+ } else {
+ return;
+ }
+ removed = path_remove_beginning(queue);
+ if(removed == NULL){
+ *flag = 1;
+ return;
+ }
+ if(!(*flag))
+ bfs_with_augmented_path_recursion(graph,queue,t,removed->node,aux->data->node,flag);
+ }
+ }*/
 
 void update_edge_capacity(_list_header *graph, int src, int dest, double flow)
 {
@@ -1571,13 +1589,18 @@ void update_edge_capacity(_list_header *graph, int src, int dest, double flow)
 
 double graph_ford_fulkerson(_list_header *graph, int s, int t)
 {
-    int n = node_counter(graph), i, j;
+    int n = node_counter(graph), it = 1, i, j;
     double minFlow, maxFlow = 0.0;
     _list_member *aux2, *aux = graph->first;
     _list_data newEdge;
     _list_header *gf = list_create(); // residual net
-    while (aux != NULL){
+    aux = graph->first;
+    while(aux != NULL){
         list_add_end(gf,aux->data);
+        aux = aux->down;
+    }
+    aux = graph->first;
+    while (aux != NULL){
         aux2 = aux->next;
         while(aux2 != NULL){
             aux2->data->predecessor = aux->data->node;
@@ -1592,6 +1615,8 @@ double graph_ford_fulkerson(_list_header *graph, int s, int t)
         }
         aux = aux->down;
     }
+    printf("Initial residual net:\n\n");
+    graph_print_with_capacity(gf);
     minFlow = bfs_with_augmented_path(gf,s,t);
     while (minFlow != -1){
         aux = get_vertex(gf,t);
@@ -1601,6 +1626,10 @@ double graph_ford_fulkerson(_list_header *graph, int s, int t)
             aux = get_vertex(gf,aux->data->predecessor);
         }
         maxFlow += minFlow;
+        printf("------------------Iteration %d---------------\n\n",it);
+        graph_print_with_capacity(gf);
+        it++;
+        printf("----------------------------------------------\n\n");
         minFlow = bfs_with_augmented_path(gf,s,t);
     }
     return maxFlow;
