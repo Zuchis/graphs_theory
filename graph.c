@@ -1484,19 +1484,32 @@ double bfs_with_augmented_path(_list_header *graph, int s, int t)
     _list_header *queue = list_create();
     _list_member *aux2,*aux;
     _list_data *edge;
-    int flag = 0;
-    bfs_with_augmented_path_recursion(graph,queue,t,s,s,&flag);
-    aux = get_vertex(graph,t);
-    if(aux->data->visited == 0)
-        return -1;
-    while(aux->data->node != s){
-        //path_add_edge_end(path,aux->data);
-        edge = get_edge(graph,aux->data->predecessor,aux->data->node);
-        minFlow = MIN(minFlow,edge->capacity);
-        aux = get_vertex(graph,aux->data->predecessor);
+    aux = get_vertex(graph,s);
+    aux->data->visited = 1;
+    aux->data->predecessor = s;
+    aux2 = aux->next;
+    while(aux2 != NULL){
+        if(aux2->data->capacity > 0)
+            path_add_edge_end(queue,aux2->data);
+        aux2 = aux2->next;
     }
-    //path_add_edge_end(path,aux->data);
-    list_purge(queue);
+    edge = path_remove_beginning(queue);
+    while(edge != NULL){
+        aux = get_vertex(graph,edge->node);
+        if(aux->data->visited != 1){
+            aux->data->visited = 1;
+            aux->data->predecessor = edge->predecessor;
+            if(aux->data->node == t)
+                break;
+            aux2= aux->next;
+            while(aux2 != NULL){
+                if (aux2->data->capacity > 0)
+                    path_add_edge_end(queue,aux->data);
+                aux2 = aux2->next;
+            }
+        }
+        edge = path_remove_beginning(queue);
+    }
     free(queue);
     return minFlow;
 }
