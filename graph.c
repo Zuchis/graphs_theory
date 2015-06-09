@@ -1121,6 +1121,84 @@ _list_header *graph_dijkstra (_list_header *graph, int node) // returns the span
     return spanningTree;
 }
 
+_list_header *graph_dijkstra_with_option (_list_header *graph, int node, int dest,int option) // returns the spanning tree for the given graph, the variable 'node' is the initial node for the algorithm
+{
+    _list_header *path = list_create();
+    _list_member *aux2, *aux = graph->first;
+    _list_data new;
+    // the variable 'n' contains the number of nodes/vertices of the graph.
+    int n = node_counter(graph), i, next, smallest, j, veryBigNumber = 1<<16;
+    double *est =(double*)malloc(sizeof(double) * n);
+    int  *pred =(int*)malloc(sizeof(int) * n), *selected =(int*)malloc(sizeof(int) * n);
+    double **weights = (double **)malloc(sizeof(double*) * n);
+    for (i = 0; i < n; i++){
+        weights[i] = (double*)malloc(sizeof(double) * n);
+    }
+    if (est == NULL || pred == NULL){
+        puts("lewl the allocation failed, try harder scrub\n");
+        exit(EXIT_FAILURE);
+    }
+    for (i = 0; i < n; i++){
+        est[i] = veryBigNumber;  // initializing the estimated best path vector, with a very big number (2^16)
+        pred[i] = -1;            // initializing the predecessors vector, all with -1
+        selected[i] = 0;         // initializing the selected vector, which will be used to mark the vertex that already has the algorithm applied
+        for (j = 0; j < n; j++){
+            weights[i][j] = -1;  // initializing the matrix which will contain all the weights of the edges of the graph
+        }
+    }
+    est[node] = 0;
+    // putting all the weights into a matrix for quicker and easier access
+    while (aux != NULL){
+        aux2 = aux->next;
+        while(aux2 != NULL){
+            if (option == COST)
+                weights[aux->data->node][aux2->data->node] = aux2->data->weight;
+            else
+                weights[aux->data->node][aux2->data->node] = aux2->data->time;
+            aux2 = aux2->next;
+        }
+        aux = aux->down;
+    }
+    //print_double_matrix(weights,n,n);
+    i = node; // start the iterations with the initial node
+    while (!allMarked(selected, n)){
+        selected[i] = 1; // mark the vertex of the current iteration
+        smallest = veryBigNumber; // the variable 'smallest' will determine what is the smallest estimated way,
+        for (j = 0; j < n; j++){  // thus providing the next vertex for the next iteration
+            if (j != node){
+                if (weights[i][j] != -1){  // Here is the relaxing process...
+                    if (est[j] > est[i] + weights[i][j]){
+                        est[j] =  est[i] + weights[i][j];
+                        pred[j] = i;
+                    }
+                }
+            }
+        }
+        for (j = 0; j < n; j++){ // check the best estimated way for all the vertices that hasn't been marked yet...
+            if (est[j] < smallest && selected[j] != 1){ // check if the vertex hasn't been marked, this will guarantee that the algorithm do exactly n = number of vertices iterations
+                smallest = est[j];
+                next = j;
+            }
+        }
+        i = next;  // ... and send it to the next iteration
+    }
+    i = dest;
+    while(i != node){
+        new.node = i;
+        new.weight = est[i];
+        path_add_edge_beginning(path,&new);
+        i = pred[i];
+    }
+    if(option == COST)
+         printf("Best value considering cost: %lf \n",est[dest]);
+    else
+        printf("Best value considering time: %lf\n",est[dest]);
+    printf("The Path is:\n");
+    path_print(path);
+    puts("\n");
+    return path;
+}
+
 int graph_bellmanFord (_list_header *graph, _list_header *spanningTree, int node)
 {
     _list_member *aux2, *aux;

@@ -1,14 +1,13 @@
 #include "graph.h"
 int main (int argc, char *argv[])
 {
-    _list_header *graph = graph_create_with_capacity();
+    _list_header *graph = graph_create_with_time();
     int n = node_counter(graph), w = graph_total_edge_count(graph);
     printf("Number of vertices: %d\nNumber of edges: %d\n\n",n,w);
     puts("Original graph:\n");
-    graph_print_with_capacity(graph);
+    graph_print_with_time(graph);
     puts("\n");
-    _list_member *aux2, *aux = graph->first;
-    double flow = graph_ford_fulkerson(graph,0,3);
-    printf("Max flow = %lf\n",flow);
+    _list_header *pathCost = graph_dijkstra_with_option(graph,0,3,COST);
+    _list_header *pathTime = graph_dijkstra_with_option(graph,0,3,TIME);
     return 0;
 }

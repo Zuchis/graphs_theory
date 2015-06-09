@@ -74,6 +74,7 @@ int get_edge_count(_list_header *, int);
 int graph_total_edge_count(_list_header *);
 int allMarked(int *, int); // returns 1 if all the vertices have been marked, returns 0 otherwise
 _list_header *graph_dijkstra (_list_header *, int); // returns the spanning tree for the given graph
+_list_header *graph_dijkstra_with_option (_list_header *, int , int ,int );// returns the spanning tree for the given graph, the variable 'node' is the initial node for the algorithm
 void print_double_matrix(double **, int , int );
 int graph_bellmanFord (_list_header *, _list_header *, int);
 _list_header *graph_floydWarshall(_list_header *);
