@@ -1120,8 +1120,9 @@ _list_header *graph_dijkstra (_list_header *graph, int node) // returns the span
     }
     return spanningTree;
 }
-
-_list_header *graph_dijkstra_with_option (_list_header *graph, int node, int dest,int option) // returns the spanning tree for the given graph, the variable 'node' is the initial node for the algorithm
+/* Calculate the best Cost or the best Time, depending on the option, from the vertex "node" to the vertex "dest"
+ * after that, it constructs the path that was calculated between the two vertices, prints and returns it. */
+_list_header *graph_dijkstra_with_option (_list_header *graph, int node, int dest,int option)
 {
     _list_header *path = list_create();
     _list_member *aux2, *aux = graph->first;
@@ -1183,15 +1184,18 @@ _list_header *graph_dijkstra_with_option (_list_header *graph, int node, int des
         i = next;  // ... and send it to the next iteration
     }
     i = dest;
-    while(i != node){
+    while(i != node){ // Construction of the path
         new.node = i;
         new.weight = est[i];
         path_add_edge_beginning(path,&new);
         i = pred[i];
     }
-    if(option == COST)
+    new.node = i; // Adding the origin
+    new.weight = est[i];
+    path_add_edge_beginning(path,&new);
+    if(option == COST) // For cost
          printf("Best value considering cost: %lf \n",est[dest]);
-    else
+    else // For time
         printf("Best value considering time: %lf\n",est[dest]);
     printf("The Path is:\n");
     path_print(path);
