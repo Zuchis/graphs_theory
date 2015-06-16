@@ -1067,7 +1067,7 @@ _list_header *graph_dijkstra (_list_header *graph, int node) // returns the span
         exit(EXIT_FAILURE);
     }
     for (i = 0; i < n; i++){
-        est[i] = veryBigNumber;  // initializing the estimated best path vector, with a very big number (2^16)
+        est[i] = (double)veryBigNumber;  // initializing the estimated best path vector, with a very big number (2^16)
         pred[i] = -1;            // initializing the predecessors vector, all with -1
         selected[i] = 0;         // initializing the selected vector, which will be used to mark the vertex that already has the algorithm applied
         for (j = 0; j < n; j++){
@@ -1682,7 +1682,7 @@ double graph_ford_fulkerson(_list_header *graph, int s, int t)
         aux = aux->down;
     }
     aux = graph->first;
-    while (aux != NULL){
+    while (aux != NULL){ // Residual net creation
         aux2 = aux->next;
         while(aux2 != NULL){
             aux2->data->predecessor = aux->data->node;
