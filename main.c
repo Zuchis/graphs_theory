@@ -12,8 +12,10 @@ int main (int argc, char *argv[])
     graph_print_with_time(graph);
     puts("\n");
     while (1){
-		printf("Please Select an option below:\n 1: Dijkstra\n2:Bellman-Ford\n3:Ford-Fulkerson\n4: Floyd Warshall\n5: Dijsktra for time or cost\n6: Floyd-Warshall for time or cost\n7:Delete Tree\n0: Exit\n");
+		printf("Please Select an option below:\n1: Dijkstra\n2: Bellman-Ford\n3: Ford-Fulkerson\n4: Floyd Warshall\n5: Dijsktra for time or cost\n6: Floyd-Warshall for time or cost\n7: Delete Tree\n8: Print the Current Tree\n0: Exit\n");
 		scanf("%d",&op);
+        if (op == 0)
+            break;
 		switch (op){
 			case 1:
 				printf("Please Enter the initial vertex:\n");
@@ -58,12 +60,20 @@ int main (int argc, char *argv[])
                     tree = graph_dijkstra_with_option(graph,src,dest,TIME);
                 break;
             case 7:
+                if(tree != NULL){
                 list_purge(tree);
                 free(tree);
+                tree = NULL;
+                } else
+                    printf("The tree is already null\n");
+                break;
+            case 8:
+                graph_print(tree);
                 break;
             default:
                 printf("Not a valid option\n");
 		}
+        puts("\n\n");
 	}
     return 0;
 }

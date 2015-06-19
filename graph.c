@@ -1253,7 +1253,7 @@ int graph_bellmanFord (_list_header *graph, _list_header *spanningTree, int node
         for (j = 0; j < n; j++){
             if(pred[j] == i && j != node){
                 new.node = j;
-                new.weight = dist[j] - dist[i];
+                new.weight = dist[j];// - dist[i];
                 graph_add_edge(spanningTree, &new, i);
             }
         }
