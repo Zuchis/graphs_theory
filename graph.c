@@ -569,7 +569,25 @@ _list_header *graph_has_eulerian_circle(_list_header *list) // This function is 
     if(graph_is_connected(list)){ // First check if the graph is connected
         _list_header *path = list_create();
         _list_member *aux2, *aux = list->first;
-        eulerian_circle(list,path,aux->data->node); // Starts the iterations
+        _list_header *gf = list_create();
+        _list_data newEdge;
+        aux = list->first;
+        while(aux != NULL){
+            list_add_end(gf,aux->data);
+            aux2 = aux->next;
+            while(aux2 != NULL){
+                graph_add_edge(gf,aux2->data, aux->data->node);
+                if(!exist_edge(list,aux2->data->node,aux->data->node)){
+                    newEdge.node = aux->data->node;
+                    newEdge.capacity = 0;
+                    newEdge.weight = aux2->data->weight;
+                    graph_add_edge(gf,&newEdge,aux2->data->node);
+                }
+                aux2 = aux2->next;
+            }
+            aux = aux->down;
+        }
+        eulerian_circle(gf,path,aux->data->node); // Starts the iterations
         aux = path->first; // Get the initial vertex
         aux2 = aux;
         while(aux2->next!=NULL)
@@ -1194,7 +1212,7 @@ _list_header *graph_dijkstra_with_option (_list_header *graph, int node, int des
     new.weight = est[i];
     path_add_edge_beginning(path,&new);
     if(option == COST) // For cost
-         printf("Best value considering cost: %lf \n",est[dest]);
+        printf("Best value considering cost: %lf \n",est[dest]);
     else // For time
         printf("Best value considering time: %lf\n",est[dest]);
     printf("The Path is:\n");
@@ -1596,8 +1614,8 @@ double bfs_with_augmented_path(_list_header *graph, int s, int t)
             }
         }
         edge = path_remove_beginning(queue);
-       // if (edge != NULL)
-           // printf("Edge removed, src: %d, dest: %d\n",edge->predecessor,edge->node);
+        // if (edge != NULL)
+        // printf("Edge removed, src: %d, dest: %d\n",edge->predecessor,edge->node);
     }
     aux = get_vertex(graph,t);
     if(aux->data->visited == 0)

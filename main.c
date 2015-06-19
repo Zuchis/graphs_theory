@@ -12,7 +12,7 @@ int main (int argc, char *argv[])
     graph_print_with_time(graph);
     puts("\n");
     while (1){
-		printf("Please Select an option below:\n1: Dijkstra\n2: Bellman-Ford\n3: Ford-Fulkerson\n4: Floyd Warshall\n5: Dijsktra for time or cost\n6: Floyd-Warshall for time or cost\n7: Delete Tree\n8: Print the Current Tree\n0: Exit\n");
+		printf("Please Select an option below:\n1: Dijkstra\n2: Bellman-Ford\n3: Ford-Fulkerson\n4: Floyd Warshall\n5: Dijsktra for time or cost\n6: Floyd-Warshall for time or cost\n7: Delete Tree\n8: Print the Current Tree\n9: Fleury Algorithm\n0: Exit\n");
 		scanf("%d",&op);
         if (op == 0)
             break;
@@ -69,6 +69,9 @@ int main (int argc, char *argv[])
                 break;
             case 8:
                 graph_print(tree);
+                break;
+            case 9:
+                tree = graph_has_eulerian_circle(graph);
                 break;
             default:
                 printf("Not a valid option\n");
